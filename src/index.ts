@@ -1,11 +1,10 @@
-
 import express from "express"
 import connectToDB from "./config.js"
+import authRouter from "./routes/auth/route.js"
 const app = express()
+app.use(express.json())
 
-app.get("/", (req, res) => {
-    res.send("hi there")
-})
+app.use("/api/auth", authRouter)
 
 app.listen(3000, async () => {
     await connectToDB()
