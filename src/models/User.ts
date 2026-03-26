@@ -1,16 +1,11 @@
 import { model, Schema } from "mongoose";
+import type { SignUpInput } from "../schemas/type.js";
 
-interface IUSER {
-    username: string,
-    email: string,
-    password: string
-}
-
-const userschema = new Schema({
-    username: {type: String, required: false},
-    email: {type: String, required: false, unique: true},
-    password: {type: String, required: false, select: false},
+const userschema = new Schema<SignUpInput>({
+    username: {type: String, required: true},
+    email: {type: String, required: true, unique: true},
+    password: {type: String, required: true, select: false},
 }, {timestamps: true})
 
-const User = model<IUSER>("users", userschema)
+const User = model("users", userschema)
 export default User
