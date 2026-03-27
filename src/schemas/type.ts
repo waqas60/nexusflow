@@ -1,5 +1,6 @@
 import z from "zod";
-export const userZodSchema = z.object({
+
+export const userSignUpZodSchema = z.object({
   username: z.string().trim(),
   email: z.email().trim().toLowerCase(),
   password: z
@@ -11,5 +12,7 @@ export const userZodSchema = z.object({
     .regex(/[0-9]/, "Add atleast one number")
     .regex(/[^a-zA-Z0-9]/, "Add atleast one special character (like @, !)"),
 });
+export const userSignInZodSchema = userSignUpZodSchema.omit({ username: true });
 
-export type SignUpInput = z.infer<typeof userZodSchema>
+export type SignUpInput = z.infer<typeof userSignUpZodSchema>;
+export type SignInput = z.infer<typeof userSignInZodSchema>;
