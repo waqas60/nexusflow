@@ -5,7 +5,10 @@ import Board from "../../models/Board.js";
 import Organization from "../../models/Organization.js";
 
 export async function createBoard(req: Request, res: Response) {
-  const result = BoardZod.BoardSchema.safeParse({ ...req.body, userId: req.userId });
+  const result = BoardZod.BoardSchema.safeParse({
+    ...req.body,
+    userId: req.userId,
+  });
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
@@ -46,7 +49,36 @@ export async function createBoard(req: Request, res: Response) {
     return ResponseHelper.sendErrorResponse(res);
   }
 }
-export async function getAllBoards(req: Request, res: Response) {}
+export async function getAllBoards(req: Request, res: Response) {
+  const result = BoardZod.GetAllBoardSchema.safeParse({
+    orgId: req.params.orgId,
+    userId: req.userId,
+  });
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
+
+  const { orgId, userId } = result.data;
+
+  try {
+    const orgExist = await Organization.findOne({ _id: orgId, userId });
+    if (!orgExist)
+      return ResponseHelper.sendNotFoundResponse(
+        res,
+        "Either organization donot exists or you are not owner of this organization",
+      );
+
+    const allBoards = await Board.find({ orgId });
+
+    return ResponseHelper.sendSuccessResponse(
+      res,
+      { allBoards },
+      "fetch boards successfully",
+    );
+  } catch (error) {
+    console.log("error while fetching all boards");
+    return ResponseHelper.sendErrorResponse(res);
+  }
+}
 export async function getBoard(req: Request, res: Response) {}
 export async function updateBoard(req: Request, res: Response) {}
 export async function deleteBoard(req: Request, res: Response) {}
