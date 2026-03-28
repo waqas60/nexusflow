@@ -1,5 +1,10 @@
 import type { Request, Response } from "express";
-import sendResponse from "../../helper/responseHelper.js";
+import {
+  sendErrorResponse,
+  sendOrgNotFoundResponse,
+  sendSuccessResponse,
+  sendZodErrorResponse,
+} from "../../helper/responseHelper.js";
 import Organization from "../../models/Organization.js";
 import {
   GetMemberZodSchema,
@@ -12,17 +17,7 @@ export async function addMember(req: Request, res: Response) {
     userId: req.userId,
     orgId: req.params.orgId,
   });
-  if (!result.success)
-    return sendResponse({
-      res,
-      statusCode: 400,
-      success: false,
-      message: "incorrect input",
-      data: result.error.issues.map((issue) => ({
-        field: issue.path[0],
-        message: issue.message,
-      })),
-    });
+  if (!result.success) return sendZodErrorResponse(res, result.error);
 
   try {
     // check org exist with userid
@@ -30,16 +25,9 @@ export async function addMember(req: Request, res: Response) {
       _id: result.data.orgId,
       userId: result.data.userId,
     });
-    if (!existingOrg)
-      return sendResponse({
-        res,
-        statusCode: 404,
-        success: false,
-        message:
-          "Either organization donot exists or you are not owner of this organization",
-      });
+    if (!existingOrg) return sendOrgNotFoundResponse(res);
     // check member already exists
-    const memberExist = await Organization.findOneAndUpdate(
+    const newMember = await Organization.findOneAndUpdate(
       {
         _id: result.data.orgId,
         userId: { $ne: result.data.memberId },
@@ -51,23 +39,14 @@ export async function addMember(req: Request, res: Response) {
     )
       .populate("members")
       .populate("userId");
-    // const orgData = memberExist?.toObject();
-    // console.log(orgData);
-    return sendResponse({
+    return sendSuccessResponse(
       res,
-      statusCode: 201,
-      success: true,
-      message: "add member created successfully",
-      data: memberExist,
-    });
+      { data: newMember },
+      "add member created successfully",
+    );
   } catch (error) {
     console.error("Error while adding memeber to organization:", error);
-    return sendResponse({
-      res,
-      statusCode: 500,
-      success: false,
-      message: "Internal server error",
-    });
+    return sendErrorResponse(res);
   }
 }
 export async function deleteMember(req: Request, res: Response) {
@@ -76,51 +55,27 @@ export async function deleteMember(req: Request, res: Response) {
     orgId: req.params.orgId,
     userId: req.userId,
   });
-  if (!result.success)
-    return sendResponse({
-      res,
-      statusCode: 400,
-      success: false,
-      message: "incorrect input",
-      data: result.error.issues.map((issue) => ({
-        field: issue.path[0],
-        message: issue.message,
-      })),
-    });
+  if (!result.success) return sendZodErrorResponse(res, result.error);
 
   const { memberId, orgId, userId } = result.data;
   try {
     // check orgId and userId in DB
     const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return sendResponse({
-        res,
-        statusCode: 404,
-        success: false,
-        message:
-          "Either organization donot exists or you are not owner of this organization",
-      });
+    if (!orgExist) return sendOrgNotFoundResponse(res);
 
     // delete member
     const deleteMember = await Organization.findByIdAndUpdate(
       { _id: orgId },
       { $pull: { members: memberId } },
     );
-    return sendResponse({
+    return sendSuccessResponse(
       res,
-      statusCode: 201,
-      success: true,
-      message: "add member created successfully",
-      data: deleteMember,
-    });
+      { data: deleteMember },
+      "delete member created successfully",
+    );
   } catch (error) {
     console.error("Error while deleting memeber to organization:", error);
-    return sendResponse({
-      res,
-      statusCode: 500,
-      success: false,
-      message: "Internal server error",
-    });
+    return sendErrorResponse(res);
   }
 }
 export async function fetchAllMember(req: Request, res: Response) {
@@ -128,21 +83,19 @@ export async function fetchAllMember(req: Request, res: Response) {
     orgId: req.params.orgId,
     userId: req.userId,
   });
-  if (!result.success)
-    return sendResponse({
-      res,
-      statusCode: 400,
-      success: false,
-      message: "incorrect input",
-      data: result.error.issues.map((issue) => ({
-        field: issue.path[0],
-        message: issue.message,
-      })),
-    });
-
+  if (!result.success) return sendZodErrorResponse(res, result.error);
   const { orgId } = result.data;
-  const members = await Organization.findById({ _id: orgId }).populate(
-    "members",
-  );
-  res.json(members);
+  try {
+    const members = await Organization.findById({ _id: orgId }).populate(
+      "members",
+    );
+    return sendSuccessResponse(
+      res,
+      { data: members },
+      "fetch members successfully",
+    );
+  } catch (error) {
+    console.log("error while deleting: ", error);
+    return sendErrorResponse(res);
+  }
 }

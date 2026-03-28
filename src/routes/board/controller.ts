@@ -1,37 +1,29 @@
 import type { Request, Response } from "express";
 import BoardSchema from "../../schemas/board.type.js";
-import sendResponse, { sendZodError } from "../../helper/responseHelper.js";
+import {
+  sendAlreadyExistResponse,
+  sendOrgNotFoundResponse,
+  sendSuccessResponse,
+  sendZodErrorResponse,
+  sendErrorResponse,
+} from "../../helper/responseHelper.js";
 import Board from "../../models/Board.js";
 import Organization from "../../models/Organization.js";
 
 export async function createBoard(req: Request, res: Response) {
   const result = BoardSchema.safeParse({ ...req.body, userId: req.userId });
-  console.log(result);
-  if (!result.success) return sendZodError(res, result.error);
+  if (!result.success) return sendZodErrorResponse(res, result.error);
   const { title, description, userId, orgId, members } = result.data;
   try {
     // check org exists
     const orgExist = await Organization.findOne({ _id: orgId, userId });
-    console.log(orgExist);
-    if (!orgExist)
-      return sendResponse({
-        res,
-        statusCode: 404,
-        success: false,
-        message:
-          "Either organization donot exists or you are not owner of this organization",
-      });
+    if (!orgExist) return sendOrgNotFoundResponse(res);
 
     // check board exists
     const boardExist = await Board.findOne({ orgId, title });
     console.log(boardExist);
     if (boardExist)
-      return sendResponse({
-        res,
-        statusCode: 409,
-        success: false,
-        message: `Board with title ${title} already exists`,
-      });
+      return sendAlreadyExistResponse(res, "Board", "title", title);
 
     // create board
     const newBoard = await Board.create({
@@ -41,22 +33,10 @@ export async function createBoard(req: Request, res: Response) {
       orgId,
       members,
     });
-    console.log("b", newBoard);
-    return sendResponse({
-      res,
-      statusCode: 201,
-      success: true,
-      message: "Board created successfully",
-      data: newBoard,
-    });
+    return sendSuccessResponse(res, newBoard, "Board created successfully");
   } catch (error) {
     console.error("Error creating board:", error);
-    return sendResponse({
-      res,
-      statusCode: 500,
-      success: false,
-      message: "Internal server error",
-    });
+    return sendErrorResponse(res);
   }
 }
 export async function getAllBoards(req: Request, res: Response) {}
