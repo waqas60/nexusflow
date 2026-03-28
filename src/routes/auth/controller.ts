@@ -3,7 +3,7 @@ import User from "../../models/User.js";
 import {
   userSignInZodSchema,
   userSignUpZodSchema,
-} from "../../schemas/type.js";
+} from "../../schemas/user.type.js";
 import {
   comparePassword,
   generatePasswordHash,
