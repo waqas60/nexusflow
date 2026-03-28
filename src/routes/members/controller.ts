@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import sendResponse from "../../helper/sendResponse.js";
+import sendResponse from "../../helper/responseHelper.js";
 import Organization from "../../models/Organization.js";
 import {
   GetMemberZodSchema,

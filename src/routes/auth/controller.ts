@@ -9,7 +9,7 @@ import {
   generatePasswordHash,
 } from "../../helper/hashPasswword.js";
 import { createToken } from "../../helper/jwtToken.js";
-import sendResponse from "../../helper/sendResponse.js";
+import sendResponse from "../../helper/responseHelper.js";
 
 export async function signUp(req: Request, res: Response) {
   // zod check

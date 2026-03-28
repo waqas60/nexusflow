@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { OrganizationZodSchema } from "../../schemas/organization.type.js";
-import sendResponse from "../../helper/sendResponse.js";
+import sendResponse from "../../helper/responseHelper.js";
 import Organization from "../../models/Organization.js";
 
 export async function createOrganization(req: Request, res: Response) {

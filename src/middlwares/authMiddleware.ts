@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import sendResponse from "../helper/sendResponse.js";
+import sendResponse from "../helper/responseHelper.js";
 import { verifyToken } from "../helper/jwtToken.js";
 
 export function authMiddleware(
