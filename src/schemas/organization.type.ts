@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import z from "zod";
 
+const objectIdSchema = z
+  .string()
+  .regex(/^[a-f\d]{24}$/i, "Invalid Id format")
+  .transform((val) => new mongoose.Types.ObjectId(val));
+
 export const organizationZodSchema = z.object({
   title: z
     .string()
@@ -13,14 +18,20 @@ export const organizationZodSchema = z.object({
     .min(3, "Description atleast 3 characters")
     .max(100, "Too long, make it less then 100")
     .trim(),
-  userId: z
-    .string()
-    .regex(/^[a-f\d]{24}$/i, "Invalid Id format")
-    .transform((val) => new mongoose.Types.ObjectId(val)),
+  userId: objectIdSchema,
   members: z
     .array(z.string().regex(/^[a-f\d]{24}$/i, "Invalid Id format"))
     .default([]),
 });
 
+export const addMemberZodSchema = organizationZodSchema
+  .pick({
+    userId: true,
+  })
+  .extend({
+    memberId: objectIdSchema,
+    orgId: objectIdSchema,
+  });
 
+export type AddMemberType = z.infer<typeof addMemberZodSchema>;
 export type OrganizationType = z.infer<typeof organizationZodSchema>;

@@ -1,5 +1,8 @@
 import type { Request, Response } from "express";
-import { organizationZodSchema } from "../../schemas/organization.type.js";
+import {
+  addMemberZodSchema,
+  organizationZodSchema,
+} from "../../schemas/organization.type.js";
 import sendResponse from "../../helper/sendResponse.js";
 import Organization from "../../models/Organization.js";
 
@@ -68,6 +71,69 @@ export async function fetchOrganization(req: Request, res: Response) {
       success: true,
       message: "fetch data successfully",
       data,
+    });
+  } catch (error) {
+    console.error("Error creating organization:", error);
+    return sendResponse({
+      res,
+      statusCode: 500,
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function addMember(req: Request, res: Response) {
+  const result = addMemberZodSchema.safeParse({
+    ...req.body,
+    userId: req.userId,
+    orgId: req.params.orgId,
+  });
+  if (!result.success)
+    return sendResponse({
+      res,
+      statusCode: 400,
+      success: false,
+      message: "incorrect input",
+      data: result.error.issues.map((issue) => ({
+        field: issue.path[0],
+        message: issue.message,
+      })),
+    });
+
+  try {
+    // check org exist with userid
+    const existingOrg = await Organization.findOne({
+      _id: result.data.orgId,
+      userId: result.data.userId,
+    });
+    if (!existingOrg)
+      return sendResponse({
+        res,
+        statusCode: 409,
+        success: false,
+        message:
+          "Either organization already exists or you are not owner of this organization",
+      });
+    // check member already exists
+    const memberExist = await Organization.findOneAndUpdate(
+      {
+        _id: result.data.orgId,
+        userId: { $ne: result.data.memberId },
+      },
+      {
+        $addToSet: { members: result.data.memberId },
+      },
+      { returnDocument: "after" },
+    ).populate("members").populate("userId");
+    // const orgData = memberExist?.toObject();
+    // console.log(orgData);
+    return sendResponse({
+      res,
+      statusCode: 201,
+      success: true,
+      message: "add member created successfully",
+      data: memberExist,
     });
   } catch (error) {
     console.error("Error creating organization:", error);
