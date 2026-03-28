@@ -1,11 +1,6 @@
 import type { Request, Response } from "express";
 import { OrganizationZodSchema } from "../../schemas/organization.type.js";
-import {
-  sendAlreadyExistResponse,
-  sendErrorResponse,
-  sendSuccessResponse,
-  sendZodErrorResponse,
-} from "../../helper/responseHelper.js";
+import { ResponseHelper } from "../../helper/index.js";
 import Organization from "../../models/Organization.js";
 
 export async function createOrganization(req: Request, res: Response) {
@@ -13,7 +8,8 @@ export async function createOrganization(req: Request, res: Response) {
     ...req.body,
     userId: req.userId,
   });
-  if (!result.success) return sendZodErrorResponse(res, result.error);
+  if (!result.success) return ResponseHelper.sendZodErrorResponse(res, result.error);
+
   const { title, description, userId, members } = result.data;
 
   try {
@@ -22,7 +18,7 @@ export async function createOrganization(req: Request, res: Response) {
       title: result.data.title,
     });
     if (existingOrgs)
-      return sendAlreadyExistResponse(
+      return ResponseHelper.sendAlreadyExistResponse(
         res,
         "Organization",
         "title",
@@ -36,23 +32,26 @@ export async function createOrganization(req: Request, res: Response) {
       members,
     });
 
-    return sendSuccessResponse(
+    return ResponseHelper.sendSuccessResponse(
       res,
       { newOrg },
       "Organization created successfully",
     );
   } catch (error) {
     console.error("Error creating organization:", error);
-    return sendErrorResponse(res);
+
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
 export async function fetchAllOrganization(req: Request, res: Response) {
   try {
     const data = await Organization.findOne({ userId: req.userId! });
-    return sendSuccessResponse(res, { data }, "fetch data successfully");
+
+    return ResponseHelper.sendSuccessResponse(res, { data }, "fetch data successfully");
   } catch (error) {
     console.error("Error creating organization:", error);
-    return sendErrorResponse(res);
+    
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
 // export async function updateOrganization(req: Request, res: Response) {}

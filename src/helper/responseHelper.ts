@@ -73,12 +73,12 @@ export const sendErrorResponse = (res: Response) => {
   });
 };
 
-export const sendInvalidCreditionalsReponse = (res: Response) => {
+export const sendInvalidCreditionalsReponse = (res: Response, message: string) => {
   sendResponse({
     res,
     statusCode: 401,
     success: false,
-    message: "invalid creditional",
+    message,
   });
 };
 

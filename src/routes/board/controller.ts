@@ -1,31 +1,23 @@
 import type { Request, Response } from "express";
 import BoardSchema from "../../schemas/board.type.js";
-import {
-  sendAlreadyExistResponse,
-  sendNotFoundResponse,
-  sendSuccessResponse,
-  sendZodErrorResponse,
-  sendErrorResponse,
-} from "../../helper/responseHelper.js";
+import { ResponseHelper } from "../../helper/index.js";
 import Board from "../../models/Board.js";
 import Organization from "../../models/Organization.js";
 
 export async function createBoard(req: Request, res: Response) {
   const result = BoardSchema.safeParse({ ...req.body, userId: req.userId });
-  if (!result.success) return sendZodErrorResponse(res, result.error);
+  if (!result.success) return ResponseHelper.sendZodErrorResponse(res, result.error);
+
   const { title, description, userId, orgId, members } = result.data;
+
   try {
-    // check org exists
     const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist) return sendNotFoundResponse(res, "Either organization donot exists or you are not owner of this organization");
+    if (!orgExist) return ResponseHelper.sendNotFoundResponse(res, "Either organization donot exists or you are not owner of this organization");
 
-    // check board exists
     const boardExist = await Board.findOne({ orgId, title });
-    console.log(boardExist);
     if (boardExist)
-      return sendAlreadyExistResponse(res, "Board", "title", title);
+      return ResponseHelper.sendAlreadyExistResponse(res, "Board", "title", title);
 
-    // create board
     const newBoard = await Board.create({
       title,
       description,
@@ -33,10 +25,11 @@ export async function createBoard(req: Request, res: Response) {
       orgId,
       members,
     });
-    return sendSuccessResponse(res, newBoard, "Board created successfully");
+    return ResponseHelper.sendSuccessResponse(res, newBoard, "Board created successfully");
   } catch (error) {
     console.error("Error creating board:", error);
-    return sendErrorResponse(res);
+    
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
 export async function getAllBoards(req: Request, res: Response) {}

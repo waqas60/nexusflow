@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import sendResponse from "../helper/responseHelper.js";
-import { verifyToken } from "../helper/jwtToken.js";
+import { JWT, ResponseHelper } from "../helper/index.js";
 
 export function authMiddleware(
   req: Request,
@@ -8,35 +7,27 @@ export function authMiddleware(
   next: NextFunction,
 ) {
   const authHeader = req.headers["authorization"];
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    // console.log(authHeader)
-    return sendResponse({
+    return ResponseHelper.sendInvalidCreditionalsReponse(
       res,
-      statusCode: 401,
-      success: false,
-      message: "Unauthorized: Missing or malformed token",
-    });
+      "Unauthorized: Missing or malformed token",
+    );
   }
+
   const token = authHeader.split(" ")[1];
   if (!token) {
-    // console.log(token);
-    return sendResponse({
+    return ResponseHelper.sendInvalidCreditionalsReponse(
       res,
-      statusCode: 401,
-      success: false,
-      message: "Unauthorized: Missing or malformed token",
-    });
+      "Unauthorized: Missing or malformed token",
+    );
   }
   try {
-    const decoded = verifyToken(token) as Record<string, any>;
+    const decoded = JWT.verifyToken(token) as Record<string, any>;
     req.userId = decoded.id;
+
     next();
   } catch (error) {
-    return sendResponse({
-      res,
-      statusCode: 401,
-      success: false,
-      message: "Invalid Token",
-    });
+    return ResponseHelper.sendInvalidCreditionalsReponse(res, "invalid token");
   }
 }

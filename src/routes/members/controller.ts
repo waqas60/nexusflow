@@ -1,10 +1,5 @@
 import type { Request, Response } from "express";
-import {
-  sendErrorResponse,
-  sendNotFoundResponse,
-  sendSuccessResponse,
-  sendZodErrorResponse,
-} from "../../helper/responseHelper.js";
+import { ResponseHelper } from "../../helper/index.js";
 import Organization from "../../models/Organization.js";
 import {
   GetMemberZodSchema,
@@ -17,20 +12,20 @@ export async function addMember(req: Request, res: Response) {
     userId: req.userId,
     orgId: req.params.orgId,
   });
-  if (!result.success) return sendZodErrorResponse(res, result.error);
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
 
   try {
-    // check org exist with userid
     const existingOrg = await Organization.findOne({
       _id: result.data.orgId,
       userId: result.data.userId,
     });
     if (!existingOrg)
-      return sendNotFoundResponse(
+      return ResponseHelper.sendNotFoundResponse(
         res,
         "Either organization donot exists or you are not owner of this organization",
       );
-    // check member already exists
+
     const newMember = await Organization.findOneAndUpdate(
       {
         _id: result.data.orgId,
@@ -43,14 +38,15 @@ export async function addMember(req: Request, res: Response) {
     )
       .populate("members")
       .populate("userId");
-    return sendSuccessResponse(
+    return ResponseHelper.sendSuccessResponse(
       res,
       { newMember },
       "add member created successfully",
     );
   } catch (error) {
     console.error("Error while adding memeber to organization:", error);
-    return sendErrorResponse(res);
+
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
 export async function deleteMember(req: Request, res: Response) {
@@ -59,31 +55,32 @@ export async function deleteMember(req: Request, res: Response) {
     orgId: req.params.orgId,
     userId: req.userId,
   });
-  if (!result.success) return sendZodErrorResponse(res, result.error);
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
 
   const { memberId, orgId, userId } = result.data;
+
   try {
-    // check orgId and userId in DB
     const orgExist = await Organization.findOne({ _id: orgId, userId });
     if (!orgExist)
-      return sendNotFoundResponse(
+      return ResponseHelper.sendNotFoundResponse(
         res,
         "Either organization donot exists or you are not owner of this organization",
       );
 
-    // delete member
     const deleteMember = await Organization.findByIdAndUpdate(
       { _id: orgId },
       { $pull: { members: memberId } },
     );
-    return sendSuccessResponse(
+    return ResponseHelper.sendSuccessResponse(
       res,
       { data: deleteMember },
       "delete member created successfully",
     );
   } catch (error) {
     console.error("Error while deleting memeber to organization:", error);
-    return sendErrorResponse(res);
+
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
 export async function fetchAllMember(req: Request, res: Response) {
@@ -91,19 +88,23 @@ export async function fetchAllMember(req: Request, res: Response) {
     orgId: req.params.orgId,
     userId: req.userId,
   });
-  if (!result.success) return sendZodErrorResponse(res, result.error);
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
+
   const { orgId } = result.data;
+
   try {
     const members = await Organization.findById({ _id: orgId }).populate(
       "members",
     );
-    return sendSuccessResponse(
+    return ResponseHelper.sendSuccessResponse(
       res,
-      { members},
+      { members },
       "fetch members successfully",
     );
   } catch (error) {
     console.log("error while deleting: ", error);
-    return sendErrorResponse(res);
+
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
