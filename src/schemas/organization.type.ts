@@ -22,4 +22,5 @@ export const organizationZodSchema = z.object({
     .default([]),
 });
 
+
 export type OrganizationType = z.infer<typeof organizationZodSchema>;

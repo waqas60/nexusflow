@@ -58,3 +58,24 @@ export async function createOrganization(req: Request, res: Response) {
     });
   }
 }
+export async function fetchOrganization(req: Request, res: Response) {
+  try {
+    const data = await Organization.findOne({ userId: req.userId! });
+    console.log(data);
+    return sendResponse({
+      res,
+      statusCode: 200,
+      success: true,
+      message: "fetch data successfully",
+      data,
+    });
+  } catch (error) {
+    console.error("Error creating organization:", error);
+    return sendResponse({
+      res,
+      statusCode: 500,
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
