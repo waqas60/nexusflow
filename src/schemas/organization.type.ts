@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import z from "zod";
 
-const objectIdSchema = z
+export const objectIdSchema = z
   .string()
   .regex(/^[a-f\d]{24}$/i, "Invalid Id format")
   .transform((val) => new mongoose.Types.ObjectId(val));
 
-export const organizationZodSchema = z.object({
+export const OrganizationZodSchema = z.object({
   title: z
     .string()
     .min(3, "Title atleast 3 characters")
@@ -24,14 +24,5 @@ export const organizationZodSchema = z.object({
     .default([]),
 });
 
-export const addMemberZodSchema = organizationZodSchema
-  .pick({
-    userId: true,
-  })
-  .extend({
-    memberId: objectIdSchema,
-    orgId: objectIdSchema,
-  });
 
-export type AddMemberType = z.infer<typeof addMemberZodSchema>;
-export type OrganizationType = z.infer<typeof organizationZodSchema>;
+export type OrganizationType = z.infer<typeof OrganizationZodSchema>;
