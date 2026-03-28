@@ -1,10 +1,10 @@
-import { objectIdSchema, OrganizationZodSchema } from "./organization.type.js";
+import { OrganizationZod } from "./index.js";
 
-export const MemberZodSchema = OrganizationZodSchema.pick({
+export const MemberZodSchema = OrganizationZod.OrganizationZodSchema.pick({
   userId: true,
 }).extend({
-  memberId: objectIdSchema,
-  orgId: objectIdSchema,
+  memberId: OrganizationZod.objectIdSchema,
+  orgId: OrganizationZod.objectIdSchema,
 });
 
 export const GetMemberZodSchema = MemberZodSchema.omit({ memberId: true });

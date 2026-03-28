@@ -1,13 +1,10 @@
 import type { Request, Response } from "express";
 import { ResponseHelper } from "../../helper/index.js";
 import Organization from "../../models/Organization.js";
-import {
-  GetMemberZodSchema,
-  MemberZodSchema,
-} from "../../schemas/member.type.js";
+import { MemberZod } from "../../schemas/index.js";
 
 export async function addMember(req: Request, res: Response) {
-  const result = MemberZodSchema.safeParse({
+  const result = MemberZod.MemberZodSchema.safeParse({
     ...req.body,
     userId: req.userId,
     orgId: req.params.orgId,
@@ -50,7 +47,7 @@ export async function addMember(req: Request, res: Response) {
   }
 }
 export async function deleteMember(req: Request, res: Response) {
-  const result = MemberZodSchema.safeParse({
+  const result = MemberZod.MemberZodSchema.safeParse({
     ...req.body,
     orgId: req.params.orgId,
     userId: req.userId,
@@ -84,7 +81,7 @@ export async function deleteMember(req: Request, res: Response) {
   }
 }
 export async function fetchAllMember(req: Request, res: Response) {
-  const result = GetMemberZodSchema.safeParse({
+  const result = MemberZod.GetMemberZodSchema.safeParse({
     orgId: req.params.orgId,
     userId: req.userId,
   });

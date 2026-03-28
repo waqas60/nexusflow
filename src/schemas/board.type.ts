@@ -1,8 +1,8 @@
 import type z from "zod";
-import { objectIdSchema, OrganizationZodSchema } from "./organization.type.js";
+import { OrganizationZod } from "./index.js";
 
-const BoardSchema = OrganizationZodSchema.extend({ orgId: objectIdSchema });
-
-export default BoardSchema;
+export const BoardSchema = OrganizationZod.OrganizationZodSchema.extend({
+  orgId: OrganizationZod.objectIdSchema,
+});
 
 export type BoardType = z.infer<typeof BoardSchema>;
