@@ -27,21 +27,20 @@ export const sendZodErrorResponse = (res: Response, error: ZodError) => {
   });
 };
 
-export const sendOrgNotFoundResponse = (res: Response) => {
+export const sendNotFoundResponse = (res: Response, message: string) => {
   return sendResponse({
     res,
     statusCode: 404,
     success: false,
-    message:
-      "Either organization donot exists or you are not owner of this organization",
+    message,
   });
 };
 
 export const sendAlreadyExistResponse = (
   res: Response,
   label: string,
-  field: string,
-  value: string,
+  field?: string,
+  value?: string,
 ) => {
   return sendResponse({
     res,
@@ -71,6 +70,15 @@ export const sendErrorResponse = (res: Response) => {
     statusCode: 500,
     success: false,
     message: "Internal server error",
+  });
+};
+
+export const sendInvalidCreditionalsReponse = (res: Response) => {
+  sendResponse({
+    res,
+    statusCode: 401,
+    success: false,
+    message: "invalid creditional",
   });
 };
 

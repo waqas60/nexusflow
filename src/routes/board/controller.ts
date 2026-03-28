@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import BoardSchema from "../../schemas/board.type.js";
 import {
   sendAlreadyExistResponse,
-  sendOrgNotFoundResponse,
+  sendNotFoundResponse,
   sendSuccessResponse,
   sendZodErrorResponse,
   sendErrorResponse,
@@ -17,7 +17,7 @@ export async function createBoard(req: Request, res: Response) {
   try {
     // check org exists
     const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist) return sendOrgNotFoundResponse(res);
+    if (!orgExist) return sendNotFoundResponse(res, "Either organization donot exists or you are not owner of this organization");
 
     // check board exists
     const boardExist = await Board.findOne({ orgId, title });

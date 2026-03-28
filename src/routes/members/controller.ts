@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import {
   sendErrorResponse,
-  sendOrgNotFoundResponse,
+  sendNotFoundResponse,
   sendSuccessResponse,
   sendZodErrorResponse,
 } from "../../helper/responseHelper.js";
@@ -25,7 +25,11 @@ export async function addMember(req: Request, res: Response) {
       _id: result.data.orgId,
       userId: result.data.userId,
     });
-    if (!existingOrg) return sendOrgNotFoundResponse(res);
+    if (!existingOrg)
+      return sendNotFoundResponse(
+        res,
+        "Either organization donot exists or you are not owner of this organization",
+      );
     // check member already exists
     const newMember = await Organization.findOneAndUpdate(
       {
@@ -41,7 +45,7 @@ export async function addMember(req: Request, res: Response) {
       .populate("userId");
     return sendSuccessResponse(
       res,
-      { data: newMember },
+      { newMember },
       "add member created successfully",
     );
   } catch (error) {
@@ -61,7 +65,11 @@ export async function deleteMember(req: Request, res: Response) {
   try {
     // check orgId and userId in DB
     const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist) return sendOrgNotFoundResponse(res);
+    if (!orgExist)
+      return sendNotFoundResponse(
+        res,
+        "Either organization donot exists or you are not owner of this organization",
+      );
 
     // delete member
     const deleteMember = await Organization.findByIdAndUpdate(
