@@ -1,6 +1,11 @@
 import type { Request, Response } from "express";
 import { OrganizationZodSchema } from "../../schemas/organization.type.js";
-import sendResponse from "../../helper/responseHelper.js";
+import {
+  sendAlreadyExistResponse,
+  sendErrorResponse,
+  sendSuccessResponse,
+  sendZodErrorResponse,
+} from "../../helper/responseHelper.js";
 import Organization from "../../models/Organization.js";
 
 export async function createOrganization(req: Request, res: Response) {
@@ -8,17 +13,7 @@ export async function createOrganization(req: Request, res: Response) {
     ...req.body,
     userId: req.userId,
   });
-  if (!result.success)
-    return sendResponse({
-      res,
-      statusCode: 400,
-      success: false,
-      message: "incorrect input",
-      data: result.error.issues.map((issue) => ({
-        field: issue.path[0],
-        message: issue.message,
-      })),
-    });
+  if (!result.success) return sendZodErrorResponse(res, result.error);
   const { title, description, userId, members } = result.data;
 
   try {
@@ -27,12 +22,12 @@ export async function createOrganization(req: Request, res: Response) {
       title: result.data.title,
     });
     if (existingOrgs)
-      return sendResponse({
+      return sendAlreadyExistResponse(
         res,
-        statusCode: 409,
-        success: false,
-        message: `Organization with title ${result.data.title} already exists`,
-      });
+        "Organization",
+        "title",
+        result.data.title,
+      );
 
     const newOrg = await Organization.create({
       title,
@@ -41,42 +36,23 @@ export async function createOrganization(req: Request, res: Response) {
       members,
     });
 
-    return sendResponse({
+    return sendSuccessResponse(
       res,
-      statusCode: 201,
-      success: true,
-      message: "Organization created successfully",
-      data: newOrg,
-    });
+      { newOrg },
+      "Organization created successfully",
+    );
   } catch (error) {
     console.error("Error creating organization:", error);
-    return sendResponse({
-      res,
-      statusCode: 500,
-      success: false,
-      message: "Internal server error",
-    });
+    return sendErrorResponse(res);
   }
 }
 export async function fetchAllOrganization(req: Request, res: Response) {
   try {
     const data = await Organization.findOne({ userId: req.userId! });
-    // console.log(data);
-    return sendResponse({
-      res,
-      statusCode: 200,
-      success: true,
-      message: "fetch data successfully",
-      data,
-    });
+    return sendSuccessResponse(res, { data }, "fetch data successfully");
   } catch (error) {
     console.error("Error creating organization:", error);
-    return sendResponse({
-      res,
-      statusCode: 500,
-      success: false,
-      message: "Internal server error",
-    });
+    return sendErrorResponse(res);
   }
 }
 // export async function updateOrganization(req: Request, res: Response) {}

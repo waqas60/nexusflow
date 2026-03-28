@@ -99,7 +99,7 @@ export async function fetchAllMember(req: Request, res: Response) {
     );
     return sendSuccessResponse(
       res,
-      { data: members },
+      { members},
       "fetch members successfully",
     );
   } catch (error) {

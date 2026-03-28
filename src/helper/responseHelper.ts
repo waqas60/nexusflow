@@ -46,7 +46,7 @@ export const sendAlreadyExistResponse = (
     res,
     statusCode: 409,
     success: false,
-    message: `${label} with ${field} ${value} already exists`,
+    message: `${label} with this ${field} ${value} already exists`,
   });
 };
 
