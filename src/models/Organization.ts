@@ -11,5 +11,5 @@ const organizationSchema = new Schema<OrganizationType>(
   { timestamps: true },
 );
 
-const Organization = model("organization", organizationSchema);
+const Organization = model("organizations", organizationSchema);
 export default Organization;
