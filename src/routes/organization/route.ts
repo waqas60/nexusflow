@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { createOrganization } from "./controller.js";
-const router:Router = Router()
+import { authMiddleware } from "../../middlwares/authMiddleware.js";
+const router: Router = Router();
 
-router.post("/", createOrganization)
+router.post("/", authMiddleware, createOrganization);
 
-export default router
+export default router;

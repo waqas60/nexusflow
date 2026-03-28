@@ -8,23 +8,25 @@ export function authMiddleware(
   next: NextFunction,
 ) {
   const authHeader = req.headers["authorization"];
-  if (!authHeader || !authHeader.startsWith("Bearer "))
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // console.log(authHeader)
     return sendResponse({
       res,
       statusCode: 401,
       success: false,
       message: "Unauthorized: Missing or malformed token",
     });
-
+  }
   const token = authHeader.split(" ")[1];
-  if (!token)
+  if (!token) {
+    // console.log(token);
     return sendResponse({
       res,
       statusCode: 401,
       success: false,
       message: "Unauthorized: Missing or malformed token",
     });
-
+  }
   try {
     const decoded = verifyToken(token) as Record<string, any>;
     req.userId = decoded.id;

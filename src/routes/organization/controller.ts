@@ -1,10 +1,13 @@
 import type { Request, Response } from "express";
 import { organizationZodSchema } from "../../schemas/organization.type.js";
 import sendResponse from "../../helper/sendResponse.js";
-import { success } from "zod";
+import Organization from "../../models/Organization.js";
 
 export async function createOrganization(req: Request, res: Response) {
-  const result = organizationZodSchema.safeParse(req.body);
+  const result = organizationZodSchema.safeParse({
+    ...req.body,
+    userId: req.userId,
+  });
   if (!result.success)
     return sendResponse({
       res,
@@ -16,6 +19,42 @@ export async function createOrganization(req: Request, res: Response) {
         message: issue.message,
       })),
     });
+  const { title, description, userId, members } = result.data;
 
-    const {title, description, } = result.data
+  try {
+    const existingOrgs = await Organization.findOne({
+      userId: result.data.userId,
+      title: result.data.title,
+    });
+    if (existingOrgs)
+      return sendResponse({
+        res,
+        statusCode: 409,
+        success: false,
+        message: `Organization with title ${result.data.title} already exists`,
+      });
+
+    const newOrg = await Organization.create({
+      title,
+      description,
+      userId,
+      members,
+    });
+
+    return sendResponse({
+      res,
+      statusCode: 201,
+      success: true,
+      message: "Organization created successfully",
+      data: newOrg,
+    });
+  } catch (error) {
+    console.error("Error creating organization:", error);
+    return sendResponse({
+      res,
+      statusCode: 500,
+      success: false,
+      message: "Internal server error",
+    });
+  }
 }
