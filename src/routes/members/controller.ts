@@ -65,7 +65,7 @@ export async function deleteMember(req: Request, res: Response) {
         "Either organization donot exists or you are not owner of this organization",
       );
 
-    const deleteMember = await Organization.findByIdAndUpdate(
+    const deleteMember = await Organization.findByIdAndDelete(
       { _id: orgId },
       { $pull: { members: memberId } },
     );

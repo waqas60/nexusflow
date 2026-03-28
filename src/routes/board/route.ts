@@ -11,8 +11,8 @@ const router: Router = Router();
 
 router.post("/", authMiddleware, createBoard);
 router.get("/:orgId", authMiddleware, getAllBoards);
-router.get("/:boardId", authMiddleware, getBoard);
-router.put("/:boardId", authMiddleware, updateBoard);
-router.delete("/:boardId", authMiddleware, deleteBoard);
+router.get("/:orgId/:boardId", authMiddleware, getBoard);
+router.put("/:orgId/:boardId", authMiddleware, updateBoard);
+router.delete("/:orgId/:boardId", authMiddleware, deleteBoard);
 
 export default router;

@@ -10,4 +10,19 @@ export const GetAllBoardSchema = BoardSchema.pick({
   userId: true,
 });
 
+export const GetBoardSchema = GetAllBoardSchema.extend({
+  boardId: OrganizationZod.objectIdSchema,
+});
+
+export const UpdateBoardSchema = BoardSchema.partial({
+  title: true,
+  description: true,
+})
+  .extend({
+    boardId: OrganizationZod.objectIdSchema,
+  })
+  .refine((data) => data.title || data.description, {
+    message: "either title or description field must be provided",
+  });
+
 export type BoardType = z.infer<typeof BoardSchema>;
