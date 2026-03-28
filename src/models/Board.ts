@@ -1,10 +1,11 @@
 import mongoose, { model, Schema } from "mongoose";
+import type { BoardType } from "../schemas/board.type.js";
 
-const boardSchema = new Schema(
+const boardSchema = new Schema<BoardType>(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
-    createdBy: { type: mongoose.Types.ObjectId, ref: "users", required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "users", required: true },
     orgId: {
       type: mongoose.Types.ObjectId,
       ref: "organizations",
