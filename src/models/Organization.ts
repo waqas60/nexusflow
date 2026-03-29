@@ -1,6 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import type { OrganizationType } from "../schemas/organization.type.js";
 
+
 const organizationSchema = new Schema<OrganizationType>(
   {
     title: { type: String, required: true },

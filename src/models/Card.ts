@@ -1,12 +1,11 @@
 import mongoose, { model, Schema } from "mongoose";
 import { Difficulty, Status, type CardType } from "../schemas/card.type.js";
-const ObjectId = mongoose.Types.ObjectId;
 
 const cardSchema = new Schema<CardType>(
   {
     title: { type: String, required: true },
     description: { type: String },
-    assignedTo: { type: ObjectId, default: null, ref: "users" },
+    assignedTo: { type: mongoose.Types.ObjectId, default: null, ref: "users" },
     status: {
       type: String,
       enum: Object.values(Status) as Status[],
@@ -17,9 +16,9 @@ const cardSchema = new Schema<CardType>(
       enum: Object.values(Difficulty) as Difficulty[],
       default: Difficulty.MEDIUM,
     },
-    boardId: { type: ObjectId, required: true, ref: "boards" },
-    orgId: { type: ObjectId, required: true, ref: "organizations" },
-    userId: { type: ObjectId, required: true, ref: "users" },
+    boardId: { type: mongoose.Types.ObjectId, required: true, ref: "boards" },
+    orgId: { type: mongoose.Types.ObjectId, required: true, ref: "organizations" },
+    userId: { type: mongoose.Types.ObjectId, required: true, ref: "users" },
   },
   { timestamps: true },
 );
