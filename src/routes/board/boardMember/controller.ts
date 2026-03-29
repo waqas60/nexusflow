@@ -44,6 +44,7 @@ export async function addMemberInBoard(req: Request, res: Response) {
     return ResponseHelper.sendErrorResponse(res);
   }
 }
+
 export async function deleteMemberInBoard(req: Request, res: Response) {
   const result = BoardZod.BoardMemberSchema.safeParse({
     userId: req.userId,
@@ -81,6 +82,36 @@ export async function deleteMemberInBoard(req: Request, res: Response) {
     return ResponseHelper.sendSuccessResponse(
       res,
       { deleteBoard },
+      "delete member in board successfully",
+    );
+  } catch (error) {
+    console.log("Error while add member in board: ", error);
+    return ResponseHelper.sendErrorResponse(res);
+  }
+}
+
+export async function getAllMembersInBoard(req: Request, res: Response) {
+  const result = BoardZod.BoardMemberSchema.safeParse({
+    userId: req.userId,
+    orgId: req.params.orgId,
+    boardId: req.params.boardId,
+    memberId: req.params.memberId,
+  });
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
+
+  const { userId, orgId, boardId, memberId } = result.data;
+
+  try {
+    const board = await Board.find({ _id: boardId, userId, orgId }).populate(
+      "members","username email _id"
+    );
+    if (!board)
+      return ResponseHelper.sendNotFoundResponse(res, "no board with");
+
+    return ResponseHelper.sendSuccessResponse(
+      res,
+      { board },
       "delete member in board successfully",
     );
   } catch (error) {

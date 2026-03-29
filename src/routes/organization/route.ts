@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middlwares/authMiddleware.js";
-import { OrganizationController } from "./organizationController/index.js";
 import { OrgMemberController } from "./orgMemberController/index.js";
+import { OrganizationController } from "./org/index.js";
 const router: Router = Router();
 
 router.use(authMiddleware);

@@ -12,7 +12,7 @@ const boardSchema = new Schema<BoardType>(
       required: true,
     },
     members: [
-      { type: mongoose.Types.ObjectId, ref: "organizations", default: [] },
+      { type: mongoose.Types.ObjectId, ref: "users", default: [] },
     ],
   },
   { timestamps: true },

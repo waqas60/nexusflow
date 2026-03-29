@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { BoardController } from "./boardController/index.js";
 import { authMiddleware } from "../../middlwares/authMiddleware.js";
 import { BoardMemberController } from "./boardMember/index.js";
+import { BoardController } from "./board/index.js";
 const router: Router = Router();
 
 router.use(authMiddleware)
@@ -14,6 +14,8 @@ router.delete("/:orgId/:boardId", BoardController.deleteBoard);
 
 // board member
 router.post("/:orgId/:boardId/members", BoardMemberController.addMemberInBoard);
+router.get("/:orgId/:boardId/:memberId", BoardMemberController.getAllMembersInBoard)
 router.delete("/:orgId/:boardId/:memberId", BoardMemberController.deleteMemberInBoard);
 
 export default router;
+    
