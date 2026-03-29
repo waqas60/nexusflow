@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { ResponseHelper } from "../../helper/index.js";
-import Organization from "../../models/Organization.js";
-import { MemberZod } from "../../schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
+import Organization from "../../../models/Organization.js";
+import { MemberZod } from "../../../schemas/index.js";
 
 export async function addMember(req: Request, res: Response) {
   const result = MemberZod.MemberZodSchema.safeParse({

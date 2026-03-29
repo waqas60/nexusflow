@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { OrganizationZod } from "../../schemas/index.js";
-import { ResponseHelper } from "../../helper/index.js";
-import Organization from "../../models/Organization.js";
+import { OrganizationZod } from "../../../schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
+import Organization from "../../../models/Organization.js";
 
 export async function createOrganization(req: Request, res: Response) {
   const result = OrganizationZod.OrganizationZodSchema.safeParse({
