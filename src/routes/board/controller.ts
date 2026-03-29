@@ -3,6 +3,7 @@ import { BoardZod } from "../../schemas/index.js";
 import { ResponseHelper } from "../../helper/index.js";
 import Board from "../../models/Board.js";
 import Organization from "../../models/Organization.js";
+import { sendErrorResponse } from "../../helper/responseHelper.js";
 
 export async function createBoard(req: Request, res: Response) {
   const result = BoardZod.BoardSchema.safeParse({
@@ -154,4 +155,37 @@ export async function updateBoard(req: Request, res: Response) {
   }
 }
 
-export async function deleteBoard(req: Request, res: Response) {}
+export async function deleteBoard(req: Request, res: Response) {
+  const result = BoardZod.GetBoardSchema.safeParse({
+    userId: req.userId,
+    orgId: req.params.orgId,
+    boardId: req.params.boardId,
+  });
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
+
+  const { userId, orgId, boardId } = result.data;
+
+  try {
+    const orgExist = await Organization.findOne({ _id: orgId, userId });
+    if (!orgId)
+      return ResponseHelper.sendNotFoundResponse(
+        res,
+        "Either organization donot exists or you are not owner of this organization",
+      );
+
+    const deleteBoard = await Board.findOneAndDelete({ _id: boardId, orgId });
+    
+    if (!deleteBoard)
+      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+
+    return ResponseHelper.sendSuccessResponse(
+      res,
+      { deleteBoard },
+      "delete board successfully",
+    );
+  } catch (error) {
+    console.log("Error while deleting a board: ", error);
+    return sendErrorResponse(res);
+  }
+}
