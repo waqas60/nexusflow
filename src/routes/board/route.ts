@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { BoardController } from "./board/index.js";
+import { BoardController } from "./boardController/index.js";
 import { authMiddleware } from "../../middlwares/authMiddleware.js";
 import { BoardMemberController } from "./boardMember/index.js";
 const router: Router = Router();
