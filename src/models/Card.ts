@@ -1,17 +1,23 @@
 import mongoose, { model, Schema } from "mongoose";
+import { Difficulty, Status, type CardType } from "../schemas/card.type.js";
 const ObjectId = mongoose.Types.ObjectId;
 
-const cardSchema = new Schema(
+const cardSchema = new Schema<CardType>(
   {
     title: { type: String, required: true },
     description: { type: String },
     assignedTo: { type: ObjectId, default: null, ref: "users" },
     status: {
       type: String,
-      enum: ["not_taken", "pending", "done"],
-      default: "not_taken",
+      enum: Object.values(Status) as Status[],
+      default: Status.NOT_TAKEN,
     },
-    board: { type: ObjectId, required: true, ref: "boards" },
+    difficulty: {
+      type: String,
+      enum: Object.values(Difficulty) as Difficulty[],
+      default: Difficulty.MEDIUM,
+    },
+    boardId: { type: ObjectId, required: true, ref: "boards" },
     orgId: { type: ObjectId, required: true, ref: "organizations" },
     userId: { type: ObjectId, required: true, ref: "users" },
   },
