@@ -1,5 +1,5 @@
 import z from "zod";
-import { OrganizationZod } from "./index.js";
+import { BoardZod, OrganizationZod } from "./index.js";
 
 export enum Difficulty {
   EASY = "easy",
@@ -13,14 +13,19 @@ export enum Status {
   DONE = "done",
 }
 
-export const CardSchema = OrganizationZod.OrganizationZodSchema.omit({
+export const CardCreateSchema = OrganizationZod.OrganizationZodSchema.omit({
   members: true,
+  userId: true
 }).extend({
-  assignedTo: OrganizationZod.objectIdSchema,
+  assignedTo: OrganizationZod.objectIdSchema.optional(),
   status: z.enum(Status),
   difficulty: z.enum(Difficulty),
-  orgId: OrganizationZod.objectIdSchema,
-  boardId: OrganizationZod.objectIdSchema,
 });
 
-export type CardType = z.infer<typeof CardSchema>;
+export const CardParamsSchema = BoardZod.GetBoardSchema
+
+export type CardCreateType = z.infer<typeof CardCreateSchema>
+export type CardParamsType = z.infer<typeof CardParamsSchema>
+
+
+export type CardType = CardCreateType & CardParamsType;
