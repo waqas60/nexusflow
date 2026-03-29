@@ -1,9 +1,8 @@
 import type { Request, Response } from "express";
-import { BoardZod } from "../../schemas/index.js";
-import { ResponseHelper } from "../../helper/index.js";
-import Board from "../../models/Board.js";
-import Organization from "../../models/Organization.js";
-import { sendErrorResponse } from "../../helper/responseHelper.js";
+import { BoardZod } from "../../../schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
+import Board from "../../../models/Board.js";
+import Organization from "../../../models/Organization.js";
 
 export async function createBoard(req: Request, res: Response) {
   const result = BoardZod.BoardSchema.safeParse({
@@ -174,8 +173,12 @@ export async function deleteBoard(req: Request, res: Response) {
         "Either organization donot exists or you are not owner of this organization",
       );
 
-    const deleteBoard = await Board.findOneAndDelete({ _id: boardId, orgId });
-    
+    const deleteBoard = await Board.findOneAndDelete({
+      _id: boardId,
+      orgId,
+      userId,
+    });
+
     if (!deleteBoard)
       return ResponseHelper.sendNotFoundResponse(res, "board not found");
 
@@ -186,6 +189,8 @@ export async function deleteBoard(req: Request, res: Response) {
     );
   } catch (error) {
     console.log("Error while deleting a board: ", error);
-    return sendErrorResponse(res);
+    return ResponseHelper.sendErrorResponse(res);
   }
 }
+
+

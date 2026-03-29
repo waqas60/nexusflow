@@ -25,4 +25,9 @@ export const UpdateBoardSchema = BoardSchema.partial({
     message: "either title or description field must be provided",
   });
 
+// board member schema
+export const BoardMemberSchema = GetBoardSchema.extend({
+  memberId: OrganizationZod.objectIdSchema,
+});
+
 export type BoardType = z.infer<typeof BoardSchema>;
