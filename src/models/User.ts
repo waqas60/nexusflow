@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import type { SignUpInput } from "../schemas/user.type.js";
+import type { SignUpInput } from "../../shared/schemas/user.type.js";
 
 const userschema = new Schema<SignUpInput>({
     username: {type: String, required: true},

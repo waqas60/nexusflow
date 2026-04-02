@@ -1,10 +1,9 @@
 import mongoose, { model, Schema } from "mongoose";
-import type { OrganizationType } from "../schemas/organization.type.js";
+import type { OrganizationServerType } from "../../shared/schemas/organization.type.js";
 
-
-const organizationSchema = new Schema<OrganizationType>(
+const organizationSchema = new Schema<OrganizationServerType>(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true},
     description: { type: String, required: true },
     userId: { type: mongoose.Types.ObjectId, ref: "users", required: true },
     members: [{ type: mongoose.Types.ObjectId, ref: "users", default: [] }],
@@ -13,4 +12,5 @@ const organizationSchema = new Schema<OrganizationType>(
 );
 
 const Organization = model("organizations", organizationSchema);
+
 export default Organization;

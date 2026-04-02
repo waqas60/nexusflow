@@ -1,46 +1,49 @@
+import { ResponseHelper } from "@/helper/index.js";
+import Board from "@/models/Board.js";
+import { BoardZod } from "@shared/schemas/index.js";
 import type { Request, Response } from "express";
-import { BoardZod } from "../../../schemas/index.js";
-import { ResponseHelper } from "../../../helper/index.js";
-import Board from "../../../models/Board.js";
+import { isSelfAction, validateBoard, validateOrgOwnership, validateUser } from "../board.helper.js";
 
 export async function addMemberInBoard(req: Request, res: Response) {
   const result = BoardZod.BoardMemberSchema.safeParse({
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
-    memberId: req.body.memberId,
+    email: req.body.email,
   });
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { userId, orgId, boardId, memberId } = result.data;
-
-  if (userId === memberId)
-    return ResponseHelper.sendBadRequestResponse(
-      res,
-      "You cannot add or remove yourself as a member",
-    );
+  const { userId, orgId, boardId, email } = result.data;
 
   try {
-    const boardFound = await Board.findOneAndUpdate(
-      { _id: boardId, orgId, userId },
-      { $addToSet: { members: memberId } },
+    const user = await validateUser(res, email);
+    if (!user) return;
+
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
+
+    if (isSelfAction(res, user._id, org.userId)) return;
+
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
+
+    if (board.members.includes(user._id))
+      return ResponseHelper.sendAlreadyExistResponse(res, "User");
+
+    const updatedBoard = await Board.findOneAndUpdate(
+      { _id: boardId, orgId },
+      { $addToSet: { members: user._id } },
       { returnDocument: "after" },
     );
 
-    if (!boardFound)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "board not found or you are not allowed to access",
-      );
-
     return ResponseHelper.sendSuccessResponse(
       res,
-      { boardFound },
-      "add member in board successfully",
+      { updatedBoard },
+      "Member added successfully",
     );
   } catch (error) {
-    console.log("Error while add member in board: ", error);
+    console.log("Error while adding member in board: ", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
@@ -50,72 +53,94 @@ export async function deleteMemberInBoard(req: Request, res: Response) {
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
-    memberId: req.params.memberId,
+    email: req.body.email,
   });
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { userId, orgId, boardId, memberId } = result.data;
-
-  if (userId === memberId)
-    return ResponseHelper.sendBadRequestResponse(
-      res,
-      "You cannot add or remove yourself as a member",
-    );
+  const { userId, orgId, boardId, email } = result.data;
 
   try {
-    const deleteBoard = await Board.findOneAndUpdate(
-      { _id: boardId, orgId, userId },
-      { $pull: { members: memberId } },
-      { returnDocument: "after" },
-    );
+    const user = await validateUser(res, email);
+    if (!user) return;
 
-    if (!deleteBoard)
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
+
+    if (isSelfAction(res, user._id, org.userId)) return;
+
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
+
+    if (!board.members.includes(user._id))
       return ResponseHelper.sendNotFoundResponse(
         res,
-        "board not found or you are not allowed to access",
+        "User is not a member of this board",
       );
 
-    if (deleteBoard.members.length === 0)
-      return ResponseHelper.sendNotFoundResponse(res, "no member found");
+    await Board.findOneAndUpdate(
+      { _id: boardId, orgId },
+      { $pull: { members: user._id } },
+    );
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      { deleteBoard },
-      "delete member in board successfully",
+      {
+        username: user.username,
+        deletedAt: new Date().toLocaleDateString("en-US"),
+      },
+      "Member removed successfully",
     );
   } catch (error) {
-    console.log("Error while add member in board: ", error);
+    console.log("Error while removing member from board: ", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
 
 export async function getAllMembersInBoard(req: Request, res: Response) {
-  const result = BoardZod.BoardMemberSchema.safeParse({
+  const result = BoardZod.GetBoardSchema.safeParse({
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
-    memberId: req.params.memberId,
   });
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { userId, orgId, boardId, memberId } = result.data;
+  const { userId, orgId, boardId } = result.data;
 
   try {
-    const board = await Board.find({ _id: boardId, userId, orgId }).populate(
-      "members","username email _id"
-    );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
+
+    const board = await Board.findOne({ _id: boardId, orgId })
+      .populate("members", "username _id")
+      .lean();
+
     if (!board)
-      return ResponseHelper.sendNotFoundResponse(res, "no board with");
+      return ResponseHelper.sendNotFoundResponse(res, "Board not found");
+
+    if (board.members.length === 0)
+      return ResponseHelper.sendNotFoundResponse(res, "No members found");
+
+    const formattedData = {
+      boardId: board._id,
+      title: board.title,
+      description: board.description,
+      members: (board.members as any).map((m: { _id: any; username: any }) => ({
+        id: m._id,
+        username: m.username,
+      })),
+      orgId: board.orgId,
+      createdAt: (board as any).createdAt.toLocaleDateString("en-US"),
+    };
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      { board },
-      "delete member in board successfully",
+      formattedData,
+      "Members fetched successfully",
     );
   } catch (error) {
-    console.log("Error while add member in board: ", error);
+    console.log("Error while fetching members: ", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }

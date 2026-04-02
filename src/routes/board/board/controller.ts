@@ -1,51 +1,43 @@
+import { ResponseHelper } from "@/helper/index.js";
+import Board from "@/models/Board.js";
+import { BoardZod } from "@shared/schemas/index.js";
 import type { Request, Response } from "express";
-import { BoardZod } from "../../../schemas/index.js";
-import { ResponseHelper } from "../../../helper/index.js";
-import Board from "../../../models/Board.js";
-import Organization from "../../../models/Organization.js";
+import {
+  formatBoard,
+  formatBoardWithMembers,
+  validateBoard,
+  validateOrgOwnership,
+} from "../board.helper.js";
 
 export async function createBoard(req: Request, res: Response) {
-  const result = BoardZod.BoardSchema.safeParse({
+  const result = BoardZod.BoardBaseSchema.safeParse({
     ...req.body,
     userId: req.userId,
+    orgId: req.params.orgId,
   });
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { title, description, userId, orgId, members } = result.data;
+  const { title, description, userId, orgId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const boardExist = await Board.findOne({ orgId, title });
+    const boardExist = await Board.findOne({ orgId, title, userId });
     if (boardExist)
-      return ResponseHelper.sendAlreadyExistResponse(
-        res,
-        "Board",
-        "title",
-        title,
-      );
+      return ResponseHelper.sendAlreadyExistResponse(res, "Board", title);
 
-    const newBoard = await Board.create({
-      title,
-      description,
-      userId,
-      orgId,
-      members,
-    });
+    const newBoard = await Board.create({ title, description, userId, orgId });
+    await newBoard.populate("userId", "username -_id");
+
     return ResponseHelper.sendSuccessResponse(
       res,
-      newBoard,
+      formatBoard(newBoard.toObject()),
       "Board created successfully",
     );
   } catch (error) {
     console.error("Error creating board:", error);
-
     return ResponseHelper.sendErrorResponse(res);
   }
 }
@@ -61,56 +53,33 @@ export async function getAllBoards(req: Request, res: Response) {
   const { orgId, userId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const allBoards = await Board.find({ orgId });
+    const allBoards = await Board.find({ orgId })
+      .populate("userId", "-_id username")
+      .populate("members", "-_id username")
+      .populate("orgId", "_id title")
+      .lean();
 
-    return ResponseHelper.sendSuccessResponse(
-      res,
-      { allBoards },
-      "fetch boards successfully",
-    );
-  } catch (error) {
-    console.log("error while fetching all boards");
-    return ResponseHelper.sendErrorResponse(res);
-  }
-}
-
-export async function getBoard(req: Request, res: Response) {
-  const result = BoardZod.GetBoardSchema.safeParse({
-    userId: req.userId,
-    orgId: req.params.orgId,
-    boardId: req.params.boardId,
-  });
-  if (!result.success)
-    return ResponseHelper.sendZodErrorResponse(res, result.error);
-
-  const { userId, orgId, boardId } = result.data;
-
-  try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
-
-    const board = await Board.findOne({ _id: boardId, orgId });
-    if (!board)
-      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+    const formattedData = allBoards.map((board) => ({
+      id: board._id,
+      orgId: (board.orgId as any)._id,
+      orgTitle: (board.orgId as any).title,
+      title: board.title,
+      description: board.description,
+      members: board.members,
+      createdBy: (board.userId as any).username,
+      createdAt: (board as any).createdAt.toLocaleDateString("en-US"),
+    }));
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      board,
-      "fetch specfic board sucessfully",
+      formattedData,
+      "Boards fetched successfully",
     );
   } catch (error) {
-    console.log("error while fetching board with id", error);
+    console.log("Error while fetching all boards:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
@@ -128,28 +97,30 @@ export async function updateBoard(req: Request, res: Response) {
   const { title, description, userId, orgId, boardId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const updateBoard = await Board.findOneAndUpdate(
+    const updatedBoard = await Board.findOneAndUpdate(
       { _id: boardId, orgId },
       { title, description },
       { returnDocument: "after" },
-    );
-    if (!updateBoard)
-      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+    )
+      .populate("userId", "-_id username")
+      .populate("members", "-_id username")
+      .lean();
+
+    if (!updatedBoard)
+      return ResponseHelper.sendNotFoundResponse(res, "Board not found");
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      { updateBoard },
-      "update board successfully",
+      formatBoardWithMembers(updatedBoard),
+      "Board updated successfully",
     );
   } catch (error) {
-    console.log("update board error found ", error);
+    if ((error as any).code === 11000)
+      return ResponseHelper.sendAlreadyExistResponse(res, "Board", title);
+    console.log("Error while updating board:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
@@ -166,31 +137,24 @@ export async function deleteBoard(req: Request, res: Response) {
   const { userId, orgId, boardId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgId)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const deleteBoard = await Board.findOneAndDelete({
-      _id: boardId,
-      orgId,
-      userId,
-    });
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
 
-    if (!deleteBoard)
-      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+    await board.deleteOne();
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      { deleteBoard },
-      "delete board successfully",
+      {
+        title: board.title,
+        deletedAt: new Date().toLocaleDateString("en-US"),
+      },
+      "Board deleted successfully",
     );
   } catch (error) {
-    console.log("Error while deleting a board: ", error);
+    console.log("Error while deleting a board:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
-
-

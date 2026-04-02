@@ -1,52 +1,39 @@
+import { ResponseHelper } from "@/helper/index.js";
+import Card from "@/models/Card.js";
+import { CardZod } from "@shared/schemas/index.js";
 import type { Request, Response } from "express";
-import { CardZod } from "../../schemas/index.js";
-import { ResponseHelper } from "../../helper/index.js";
-import Organization from "../../models/Organization.js";
-import Board from "../../models/Board.js";
-import Card from "../../models/Card.js";
+import { formatCard, validateBoard, validateCard } from "./card.helper.js";
+import { validateOrgOwnership } from "../organization/org.helper.js";
 
 export async function createCard(req: Request, res: Response) {
-  const resultParams = CardZod.CardParamsSchema.safeParse({
+  const result = CardZod.CardServerSchema.safeParse({
+    ...req.body,
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
   });
-  if (!resultParams.success)
-    return ResponseHelper.sendZodErrorResponse(res, resultParams.error);
-
-  const result = CardZod.CardCreateSchema.safeParse(req.body);
-
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { boardId, orgId, userId } = resultParams.data;
+  const { boardId, orgId, userId, title, description, difficulty, status } =
+    result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "either org not found or you are not allowed to access this org",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const boardExist = await Board.findOne({ _id: boardId, orgId, userId });
-    if (!boardExist)
-      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
 
-    const cardExist = await Card.findOne({ orgId, title: result.data.title });
+    const cardExist = await Card.findOne({ boardId, title });
     if (cardExist)
-      return ResponseHelper.sendAlreadyExistResponse(
-        res,
-        "Card",
-        "title",
-        result.data.title,
-      );
+      return ResponseHelper.sendAlreadyExistResponse(res, "Card", title);
 
     const newCard = await Card.create({
-      title: result.data.title,
-      description: result.data.description,
-      status: result.data.status,
-      difficulty: result.data.difficulty,
+      title,
+      description,
+      status,
+      difficulty,
       boardId,
       orgId,
       userId,
@@ -54,17 +41,17 @@ export async function createCard(req: Request, res: Response) {
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      newCard,
-      "card created successfully",
+      formatCard(newCard.toObject()),
+      "Card created successfully",
     );
   } catch (error) {
-    console.log("Error while creating card ", error);
+    console.error("Error while creating card:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
 
 export async function fetchAllCards(req: Request, res: Response) {
-  const result = CardZod.CardParamsSchema.safeParse({
+  const result = CardZod.CardAllGetSchema.safeParse({
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
@@ -75,129 +62,105 @@ export async function fetchAllCards(req: Request, res: Response) {
   const { userId, orgId, boardId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "either org not found or you are not allowed to access this org",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const boardExist = await Board.findOne({ _id: boardId, orgId, userId });
-    if (!boardExist)
-      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
 
-    const cards = await Card.find({ orgId, boardId, userId });
-    if (!cards)
-      return ResponseHelper.sendNotFoundResponse(res, "card not found");
+    const cards = await Card.find({ boardId, orgId }).lean();
+
+    if (!cards.length)
+      return ResponseHelper.sendNotFoundResponse(res, "No cards found");
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      cards,
-      "fetch cards successfully",
+      cards.map(formatCard),
+      "Cards fetched successfully",
     );
   } catch (error) {
-    console.log("Error while fetching all cards", error);
+    console.error("Error while fetching cards:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
 
 export async function updateCard(req: Request, res: Response) {
-  const resultParams = CardZod.CardUpdateParamsSchema.safeParse({
+  const result = CardZod.CardUpdateSchema.safeParse({
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
     cardId: req.params.cardId,
   });
-  if (!resultParams.success)
-    return ResponseHelper.sendZodErrorResponse(res, resultParams.error);
-
-  const result = CardZod.CardUpdateSchema.safeParse(req.body);
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { userId, orgId, boardId, cardId } = resultParams.data;
+  const body = CardZod.CardUpdateSchema.safeParse(req.body);
+  if (!body.success)
+    return ResponseHelper.sendZodErrorResponse(res, body.error);
+
+  const { userId, orgId, boardId, cardId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "either org not found or you are not allowed to access this org",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    const boardExist = await Board.findOne({ _id: boardId, orgId, userId });
-    if (!boardExist)
-      return ResponseHelper.sendNotFoundResponse(res, "board not found");
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
 
-    const cards = await Card.findOneAndUpdate(
-      {
-        _id: cardId,
-        orgId,
-        boardId,
-      },
-      { $set: result.data },
-      { new: true },
-    );
-    if (!cards)
-      return ResponseHelper.sendNotFoundResponse(res, "card not found");
+    const updatedCard = await Card.findOneAndUpdate(
+      { _id: cardId, boardId, orgId },
+      { $set: body.data },
+      { returnDocument: "after" },
+    ).lean();
+
+    if (!updatedCard)
+      return ResponseHelper.sendNotFoundResponse(res, "Card not found");
 
     return ResponseHelper.sendSuccessResponse(
       res,
-      cards,
-      "fetch cards successfully",
+      formatCard(updatedCard),
+      "Card updated successfully",
     );
   } catch (error) {
-    console.log("Error while fetching all cards", error);
+    console.error("Error while updating card:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }
 
 export async function deleteCard(req: Request, res: Response) {
-  const resultParams = CardZod.CardUpdateParamsSchema.safeParse({
+  const result = CardZod.CardUpdateSchema.safeParse({
     userId: req.userId,
     orgId: req.params.orgId,
     boardId: req.params.boardId,
     cardId: req.params.cardId,
   });
-  if (!resultParams.success)
-    return ResponseHelper.sendZodErrorResponse(res, resultParams.error);
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  const { userId, orgId, boardId, cardId } = resultParams.data;
+  const { userId, orgId, boardId, cardId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "either org not found or you are not allowed to access this org",
-      );
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Organization not found or access denied",
-      );
+    const board = await validateBoard(res, boardId, orgId);
+    if (!board) return;
 
-    const boardExist = await Board.findOne({
-      _id: boardId,
-      orgId,
-      userId,
-    });
-    if (!boardExist)
-      return ResponseHelper.sendNotFoundResponse(res, "Board not found");
+    const card = await validateCard(res, cardId, boardId, orgId);
+    if (!card) return;
 
-    const card = await Card.findOneAndDelete({
-      _id: cardId,
-      boardId,
-      orgId,
-      userId,
-    });
-    if (!card)
-      return ResponseHelper.sendNotFoundResponse(res, "card not found");
+    await card.deleteOne();
 
-    return ResponseHelper.sendSuccessResponse(res, card, "Card deleted");
+    return ResponseHelper.sendSuccessResponse(
+      res,
+      {
+        title: card.title,
+        deletedAt: new Date().toLocaleDateString("en-US"),
+      },
+      "Card deleted successfully",
+    );
   } catch (error) {
-    console.log("Error while deleting card", error);
+    console.error("Error while deleting card:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }

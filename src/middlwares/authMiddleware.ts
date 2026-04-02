@@ -6,16 +6,7 @@ export function authMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const authHeader = req.headers["authorization"];
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return ResponseHelper.sendInvalidCreditionalsReponse(
-      res,
-      "Unauthorized: Missing or malformed token",
-    );
-  }
-
-  const token = authHeader.split(" ")[1];
+  const token = req.headers["authorization"];
   if (!token) {
     return ResponseHelper.sendInvalidCreditionalsReponse(
       res,

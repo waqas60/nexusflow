@@ -1,10 +1,15 @@
+import { ResponseHelper } from "@/helper/index.js";
+import Organization from "@/models/Organization.js";
+import { OrganizationZod } from "@shared/schemas/index.js";
 import type { Request, Response } from "express";
-import { ResponseHelper } from "../../../helper/index.js";
-import Organization from "../../../models/Organization.js";
-import { MemberZod } from "../../../schemas/index.js";
+import {
+  isSelfAction,
+  validateOrgOwnership,
+  validateUser,
+} from "../org.helper.js";
 
 export async function addMember(req: Request, res: Response) {
-  const result = MemberZod.MemberZodSchema.safeParse({
+  const result = OrganizationZod.AddOrgServerSchema.safeParse({
     ...req.body,
     userId: req.userId,
     orgId: req.params.orgId,
@@ -12,96 +17,111 @@ export async function addMember(req: Request, res: Response) {
   if (!result.success)
     return ResponseHelper.sendZodErrorResponse(res, result.error);
 
-  try {
-    const existingOrg = await Organization.findOne({
-      _id: result.data.orgId,
-      userId: result.data.userId,
-    });
-    if (!existingOrg)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
-
-    const newMember = await Organization.findOneAndUpdate(
-      {
-        _id: result.data.orgId,
-        userId: { $ne: result.data.memberId },
-      },
-      {
-        $addToSet: { members: result.data.memberId },
-      },
-      { returnDocument: "after" },
-    )
-      .populate("members")
-      .populate("userId");
-    return ResponseHelper.sendSuccessResponse(
-      res,
-      { newMember },
-      "add member created successfully",
-    );
-  } catch (error) {
-    console.error("Error while adding memeber to organization:", error);
-
-    return ResponseHelper.sendErrorResponse(res);
-  }
-}
-export async function deleteMember(req: Request, res: Response) {
-  const result = MemberZod.MemberZodSchema.safeParse({
-    ...req.body,
-    orgId: req.params.orgId,
-    userId: req.userId,
-  });
-  if (!result.success)
-    return ResponseHelper.sendZodErrorResponse(res, result.error);
-
-  const { memberId, orgId, userId } = result.data;
+  const { email, userId, orgId } = result.data;
 
   try {
-    const orgExist = await Organization.findOne({ _id: orgId, userId });
-    if (!orgExist)
-      return ResponseHelper.sendNotFoundResponse(
-        res,
-        "Either organization donot exists or you are not owner of this organization",
-      );
+    const user = await validateUser(res, email);
+    if (!user) return;
 
-    const deleteMember = await Organization.findByIdAndDelete(
-      { _id: orgId },
-      { $pull: { members: memberId } },
-    );
-    return ResponseHelper.sendSuccessResponse(
-      res,
-      { data: deleteMember },
-      "delete member created successfully",
-    );
-  } catch (error) {
-    console.error("Error while deleting memeber to organization:", error);
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
 
-    return ResponseHelper.sendErrorResponse(res);
-  }
-}
-export async function fetchAllMember(req: Request, res: Response) {
-  const result = MemberZod.GetMemberZodSchema.safeParse({
-    orgId: req.params.orgId,
-    userId: req.userId,
-  });
-  if (!result.success)
-    return ResponseHelper.sendZodErrorResponse(res, result.error);
+    if (isSelfAction(res, user._id, org.userId)) return;
 
-  const { orgId } = result.data;
+    if (org.members.some((m) => m.equals(user._id)))
+      return ResponseHelper.sendAlreadyExistResponse(res, "User", email);
 
-  try {
-    const members = await Organization.findById({ _id: orgId }).populate(
-      "members",
-    );
+    org.members.push(user._id);
+    await org.save();
+
+    await org.populate("members", "username -_id");
+    const members = (org.toObject().members as any[]).map((m) => m.username);
+
     return ResponseHelper.sendSuccessResponse(
       res,
       { members },
-      "fetch members successfully",
+      "Member added successfully",
     );
   } catch (error) {
-    console.log("error while deleting: ", error);
+    console.error("Error while adding member to organization:", error);
+    return ResponseHelper.sendErrorResponse(res);
+  }
+}
 
+export async function deleteMember(req: Request, res: Response) {
+  const result = OrganizationZod.AddOrgServerSchema.safeParse({
+    ...req.body,
+    orgId: req.params.orgId,
+    userId: req.userId,
+  });
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
+
+  const { orgId, userId, email } = result.data;
+
+  try {
+    const user = await validateUser(res, email);
+    if (!user) return;
+
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
+
+    if (isSelfAction(res, user._id, org.userId)) return;
+
+    if (!org.members.some((m) => m.equals(user._id)))
+      return ResponseHelper.sendNotFoundResponse(
+        res,
+        "User is not a member of this organization",
+      );
+
+    org.members = org.members.filter((m) => !m.equals(user._id));
+    await org.save();
+
+    return ResponseHelper.sendSuccessResponse(
+      res,
+      {
+        username: user.username,
+        removedAt: new Date().toLocaleDateString("en-US"),
+      },
+      "Member removed successfully",
+    );
+  } catch (error) {
+    console.error("Error while removing member from organization:", error);
+    return ResponseHelper.sendErrorResponse(res);
+  }
+}
+
+export async function fetchAllMembers(req: Request, res: Response) {
+  const result = OrganizationZod.FetchAllMembersInOrg.safeParse({
+    orgId: req.params.orgId,
+    userId: req.userId,
+  });
+  if (!result.success)
+    return ResponseHelper.sendZodErrorResponse(res, result.error);
+
+  const { orgId, userId } = result.data;
+
+  try {
+    const org = await validateOrgOwnership(res, orgId, userId);
+    if (!org) return;
+
+    await org.populate("members", "-_id username email");
+
+    if (org.members.length === 0)
+      return ResponseHelper.sendNotFoundResponse(res, "No members found");
+
+    const members = (org.members as any[]).map((m) => ({
+      username: m.username,
+      email: m.email,
+    }));
+
+    return ResponseHelper.sendSuccessResponse(
+      res,
+      { members },
+      "Members fetched successfully",
+    );
+  } catch (error) {
+    console.error("Error while fetching members:", error);
     return ResponseHelper.sendErrorResponse(res);
   }
 }

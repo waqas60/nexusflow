@@ -1,11 +1,14 @@
+import {
+  Difficulty,
+  Status,
+  type CardServerSchemaType,
+} from "@shared/schemas/card.type.js";
 import mongoose, { model, Schema } from "mongoose";
-import { Difficulty, Status, type CardType } from "../schemas/card.type.js";
 
-const cardSchema = new Schema<CardType>(
+const cardSchema = new Schema<CardServerSchemaType>(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, unique: true },
     description: { type: String },
-    assignedTo: { type: mongoose.Types.ObjectId, default: null, ref: "users" },
     status: {
       type: String,
       enum: Object.values(Status) as Status[],
@@ -16,12 +19,21 @@ const cardSchema = new Schema<CardType>(
       enum: Object.values(Difficulty) as Difficulty[],
       default: Difficulty.MEDIUM,
     },
+    assignedTo: { type: mongoose.Types.ObjectId, default: null, ref: "users" },
     boardId: { type: mongoose.Types.ObjectId, required: true, ref: "boards" },
-    orgId: { type: mongoose.Types.ObjectId, required: true, ref: "organizations" },
+    orgId: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      ref: "organizations",
+    },
     userId: { type: mongoose.Types.ObjectId, required: true, ref: "users" },
   },
   { timestamps: true },
 );
 
+
+
 const Card = model("cards", cardSchema);
+
+
 export default Card;

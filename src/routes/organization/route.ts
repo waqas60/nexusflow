@@ -1,7 +1,7 @@
+import { authMiddleware } from "@/middlwares/authMiddleware.js";
 import { Router } from "express";
-import { authMiddleware } from "../../middlwares/authMiddleware.js";
-import { OrgMemberController } from "./orgMemberController/index.js";
 import { OrganizationController } from "./org/index.js";
+import { OrgMemberController } from "./orgMemberController/index.js";
 const router: Router = Router();
 
 router.use(authMiddleware);
@@ -10,8 +10,8 @@ router.get("/", OrganizationController.fetchAllOrganization);
 router.post("/", OrganizationController.createOrganization);
 
 // member logic
-router.get("/:orgId/members", OrgMemberController.fetchAllMember);
-router.post("/:orgId/add-member", OrgMemberController.addMember);
-router.delete("/:orgId/delete-member", OrgMemberController.deleteMember);
+router.get("/:orgId/members", OrgMemberController.fetchAllMembers);
+router.post("/:orgId/members", OrgMemberController.addMember);
+router.delete("/:orgId/members", OrgMemberController.deleteMember);
 
 export default router;

@@ -14,6 +14,9 @@ export default function sendResponse({
     data,
   });
 }
+
+
+
 export const sendZodErrorResponse = (res: Response, error: ZodError) => {
   return sendResponse({
     res,
@@ -39,14 +42,14 @@ export const sendNotFoundResponse = (res: Response, message: string) => {
 export const sendAlreadyExistResponse = (
   res: Response,
   label: string,
-  field?: string,
   value?: string,
 ) => {
+  const detail = value ? ` with this ${value}` : "";
   return sendResponse({
     res,
     statusCode: 409,
     success: false,
-    message: `${label} with this ${field} ${value} already exists`,
+    message: `${label}${detail} already exists`,
   });
 };
 
