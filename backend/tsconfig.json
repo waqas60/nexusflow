@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
     "ignoreDeprecations": "5.0",
-    "rootDir": ".",
-    "outDir": "./dist",
-    "module": "nodenext",
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["src/shared/*"],
       "@/*": ["./src/*"]
     },
+    "rootDir": ".",
+    "outDir": "./dist",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "esnext",
     "types": ["node"],
     "sourceMap": true,
