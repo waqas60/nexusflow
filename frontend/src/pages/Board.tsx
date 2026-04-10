@@ -119,7 +119,7 @@ export const Board = () => {
       <div className="mt-10 flex gap-5 flex-wrap">
         {boards.length === 0 && (
           <div className="col-span-3 w-full flex justify-center items-center text-4xl font-bold text-neutral-300 h-40">
-            No Orgs
+            No Boards
           </div>
         )}
 
