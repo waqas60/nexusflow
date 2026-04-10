@@ -21,13 +21,30 @@ export default function Landing() {
           without the noise.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button
-            text="Get Started"
+          <button
+            className="w-full sm:w-auto text-[14px] font-semibold text-white bg-neutral-950 border border-slate-200 px-8 py-3.5 rounded-2xl hover:border-slate-400 transition-all cursor-pointer"
             onClick={() => navigate("/dashboard/organization")}
-          />
-          <button className="w-full sm:w-auto text-[14px] font-semibold text-slate-700 bg-white border border-slate-200 px-8 py-3.5 rounded-2xl hover:border-slate-400 transition-all">
-            Watch demo →
+          >
+            Get Started
           </button>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-6 pb-20">
+        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/60">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="w-full"
+          >
+            <source
+              src="https://res.cloudinary.com/doxl2zlcx/video/upload/q_auto,f_auto/nexusflow_ikri73.mp4"
+              type="video/mp4"
+            />
+          </video>
         </div>
       </section>
     </div>
