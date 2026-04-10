@@ -84,7 +84,7 @@ export async function getAllBoards(req: Request, res: Response) {
       title: board.title,
       description: board.description,
       members: board.members,
-      createdBy: (board.userId as any).username,
+      createdBy: (board.userId as any)?.username ?? "Unknown",
       createdAt: (board as any).createdAt.toLocaleDateString("en-US"),
     }));
 
