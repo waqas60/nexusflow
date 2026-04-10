@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "../components/Button";
 import AddOrganization from "../components/AddOrganization";
-import axios from "axios";
 import { toast } from "react-toastify";
 import CardOrg from "../components/CardOrg";
 import { ClipLoader } from "react-spinners";
+import api from "../lib/axios";
 
 export const Organization = () => {
   const [isOpenAddOrgBox, setIsOpenAddOrgBox] = useState(false);
@@ -17,8 +17,8 @@ export const Organization = () => {
   const getAllOrgs = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/organization",
+      const response = await api.get(
+        "/api/organization",
         {
           headers: {
             Authorization: localStorage.getItem("token"),
@@ -43,8 +43,8 @@ export const Organization = () => {
     e.stopPropagation();
     if (inputRef.current && descriptionRef.current) {
       try {
-        const response = await axios.post(
-          "http://localhost:3000/api/organization",
+        const response = await api.post(
+          "/api/organization",
           {
             title: inputRef.current.value,
             description: descriptionRef.current.value,
@@ -84,8 +84,8 @@ export const Organization = () => {
   const deleteOrg = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/api/organization/${id}`,
+      const response = await api.delete(
+        `/api/organization/${id}`,
         {
           headers: {
             Authorization: localStorage.getItem("token"),
@@ -121,7 +121,6 @@ export const Organization = () => {
         />
       </div>
 
-      
       {isOpenAddOrgBox && (
         <AddOrganization
           titleRef={inputRef}
@@ -131,7 +130,6 @@ export const Organization = () => {
         />
       )}
 
-      
       <div className="mt-10 flex gap-5 flex-wrap">
         {dataNotFound && (
           <p className="text-neutral-500 text-xl h-full mx-auto">No orgs</p>

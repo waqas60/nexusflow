@@ -2,10 +2,10 @@ import { useRef, useState } from "react";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 import Input from "../components/Input";
-import axios from "axios";
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEye } from "react-icons/io5";
 import { toast } from "react-toastify";
+import api from "../lib/axios";
 
 export default function SignUp() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -16,13 +16,10 @@ export default function SignUp() {
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) return;
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/signin",
-        {
-          email: emailRef.current.value,
-          password: passwordRef.current.value,
-        },
-      );
+      const response = await api.post("/api/auth/signin", {
+        email: emailRef.current.value,
+        password: passwordRef.current.value,
+      });
       const data = response.data;
       if (data.success) {
         toast.success(data.message);

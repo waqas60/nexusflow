@@ -1,11 +1,11 @@
 import React, { useRef, useState } from "react";
 import Button from "./Button";
 import Input from "./Input";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
 import { HiOutlineViewBoards } from "react-icons/hi";
+import api from "../lib/axios";
 
 type CardProp = {
   id: string;
@@ -32,8 +32,8 @@ export default function CardOrg(card: CardProp) {
     setisMemberCardOpen(true);
     if (memberRef.current) {
       try {
-        const response = await axios.post(
-          `http://localhost:3000/api/organization/${card.id}/members`,
+        const response = await api.post(
+          `/api/organization/${card.id}/members`,
           {
             email: memberRef.current.value,
           },

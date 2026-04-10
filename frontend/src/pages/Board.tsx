@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "../components/Button";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import CardBoard from "../components/CardBoard";
 import AddBoard from "../components/AddBoard";
 import { ClipLoader } from "react-spinners";
+import api from "../lib/axios";
 
 export const Board = () => {
   const [isOpenAddboardBox, setIsOpenAddBoardBox] = useState(false);
@@ -18,8 +18,8 @@ export const Board = () => {
   const getAllBoards = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/board/${orgId}`,
+      const response = await api.get(
+        `/api/board/${orgId}`,
         {
           headers: {
             Authorization: localStorage.getItem("token"),
@@ -42,8 +42,8 @@ export const Board = () => {
   const addBoard = async () => {
     if (inputRef.current && descriptionRef.current) {
       try {
-        const response = await axios.post(
-          `http://localhost:3000/api/board/${orgId}`,
+        const response = await api.post(
+          `/api/board/${orgId}`,
           {
             title: inputRef.current.value,
             description: descriptionRef.current.value,
@@ -81,8 +81,8 @@ export const Board = () => {
 
   const deleteBoard = async (id: string) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/api/board/${orgId}/${id}`,
+      const response = await api.delete(
+        `/api/board/${orgId}/${id}`,
         {
           headers: {
             Authorization: localStorage.getItem("token"),

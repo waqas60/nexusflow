@@ -2,9 +2,9 @@ import { useRef, useState } from "react";
 import Button from "./Button";
 import { MdDelete } from "react-icons/md";
 import Input from "./Input";
-import axios from "axios";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import api from "../lib/axios";
 
 export type CardComponentProp = {
   id: string;
@@ -40,8 +40,8 @@ export default function CardComponent(card: CardComponentProp) {
     setisMemberCardOpen(true);
     if (memberRef.current) {
       try {
-        const response = await axios.post(
-          `http://localhost:3000/api/card/${orgId}/${boardId}/${card.id}/members`,
+        const response = await api.post(
+          `/api/card/${orgId}/${boardId}/${card.id}/members`,
           { email: memberRef.current.value },
           { headers: { Authorization: localStorage.getItem("token") } },
         );
@@ -63,8 +63,8 @@ export default function CardComponent(card: CardComponentProp) {
 
   const deleteCard = async () => {
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/api/card/${orgId}/${boardId}/${card.id}`,
+      const response = await api.delete(
+        `/api/card/${orgId}/${boardId}/${card.id}`,
         { headers: { Authorization: localStorage.getItem("token") } },
       );
       const data = response.data;
@@ -83,8 +83,8 @@ export default function CardComponent(card: CardComponentProp) {
 
   const takeTask = async () => {
     try {
-      const res = await axios.patch(
-        `http://localhost:3000/api/card/${orgId}/board/${boardId}/task/${card.id}/take`,
+      const res = await api.patch(
+        `/api/card/${orgId}/board/${boardId}/task/${card.id}/take`,
         {},
         { headers: { Authorization: localStorage.getItem("token") } },
       );
@@ -99,8 +99,8 @@ export default function CardComponent(card: CardComponentProp) {
 
   const updateStatus = async (status: "pending" | "done") => {
     try {
-      const res = await axios.patch(
-        `http://localhost:3000/api/card/${orgId}/board/${boardId}/task/${card.id}/status`,
+      const res = await api.patch(
+        `/api/card/${orgId}/board/${boardId}/task/${card.id}/status`,
         { status },
         { headers: { Authorization: localStorage.getItem("token") } },
       );

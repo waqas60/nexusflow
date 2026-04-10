@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import Button from "../components/Button";
 import { useParams } from "react-router-dom";
 import AddCard from "../components/AddCard";
-import axios from "axios";
 import CardComponent from "../components/CardComponent";
 import { toast } from "react-toastify";
+import api from "../lib/axios";
 
 const columnsColors = {
   "Not Taken": "bg-indigo-200",
@@ -38,8 +38,8 @@ export const Card = () => {
       statusRef.current
     ) {
       try {
-        const response = await axios.post(
-          `http://localhost:3000/api/card/${orgId}/${boardId}`,
+        const response = await api.post(
+          `api/card/${orgId}/${boardId}`,
           {
             title: inputRef.current.value,
             description: descriptionRef.current.value,
@@ -65,14 +65,13 @@ export const Card = () => {
       }
     }
   };
-  
 
   const getCards = async () => {
-    console.log("orgId:", orgId, "boardId:", boardId); // check these values
+    console.log("orgId:", orgId, "boardId:", boardId); 
 
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/card/${orgId}/${boardId}`,
+      const response = await api.get(
+        `/api/card/${orgId}/${boardId}`,
         {
           headers: { Authorization: localStorage.getItem("token") },
         },
@@ -104,7 +103,6 @@ export const Card = () => {
         <Button text="Add Card" onClick={() => addCard()} />
       </div>
 
-      
       {isOpenAddCardBox && (
         <AddCard
           titleRef={inputRef}
@@ -115,7 +113,6 @@ export const Card = () => {
         />
       )}
 
-      
       <div className="grid w-full grid-cols-3 gap-2 my-8 text-xs">
         {columns.map((col) => (
           <div
