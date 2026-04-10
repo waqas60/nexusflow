@@ -1,10 +1,20 @@
 import express from "express";
 import connectToDB from "./config/db.config.js";
-import { UserRouter, OrganizationRouter, BoardRouter, CardRouter } from "./routes/index.js";
-import cors from "cors"
+import {
+  UserRouter,
+  OrganizationRouter,
+  BoardRouter,
+  CardRouter,
+} from "./routes/index.js";
+import cors from "cors";
 const app = express();
 app.use(express.json());
-app.use(cors())
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 
 app.use("/api/auth", UserRouter);
 app.use("/api/organization", OrganizationRouter);
