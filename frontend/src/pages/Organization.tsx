@@ -63,7 +63,7 @@ export const Organization = () => {
           console.log(error.response.data.data);
 
           toast.error(
-            error.response.data.data.map((obj) => obj.message).join(", "),
+            error.response.data.data.map((obj: any) => obj.message).join(", "),
           );
         } else if (!error.response.data.success) {
           toast.error(error.response.data.message);

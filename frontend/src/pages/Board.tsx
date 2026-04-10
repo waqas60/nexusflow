@@ -11,7 +11,7 @@ export const Board = () => {
   const [isOpenAddboardBox, setIsOpenAddBoardBox] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  const [boards, setBoards] = useState([]);
+  const [boards, setBoards] = useState<any[]>([]);
   const { orgId } = useParams();
   const [loading, setLoading] = useState(false);
 
@@ -64,7 +64,7 @@ export const Board = () => {
       } catch (error: any) {
         if (error.response.data.message === "incorrect input") {
           toast.error(
-            error.response.data.data.map((obj) => obj.message).join(", "),
+            error.response.data.data.map((obj: any) => obj.message).join(", "),
           );
         } else if (!error.response.data.success) {
           toast.error(error.response.data.message);

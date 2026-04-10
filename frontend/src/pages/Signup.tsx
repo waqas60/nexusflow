@@ -33,7 +33,7 @@ export default function SignUp() {
         const data = error.response.data;
         if (Array.isArray(data.data))
           toast.error(
-            error.response.data.data.map((d) => d.message).join("\n"),
+            error.response.data.data.map((d: any) => d.message).join("\n"),
           );
         else toast.error(data.message);
       }

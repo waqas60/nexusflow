@@ -6,11 +6,12 @@ import CardComponent from "../components/CardComponent";
 import { toast } from "react-toastify";
 import api from "../lib/axios";
 
-const columnsColors = {
+const columnsColors: Record<string, string> = {
   "Not Taken": "bg-indigo-200",
   Pending: "bg-orange-100",
-  Done: "bg-green-100 ",
+  Done: "bg-green-100",
 };
+
 
 export const Card = () => {
   const [isOpenAddCardBox, setIsOpenAddCardBox] = useState(false);
@@ -18,7 +19,7 @@ export const Card = () => {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const difficultyRef = useRef<HTMLSelectElement>(null);
   const statusRef = useRef<HTMLSelectElement>(null);
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] = useState<any[]>([]);
   const { orgId, boardId } = useParams();
   const notTakenTasks = cards.filter((c) => c.status === "not_taken");
   const pendingTasks = cards.filter((c) => c.status === "pending");
@@ -130,7 +131,7 @@ export const Card = () => {
                 difficulty={task.difficulty}
                 assignedTo={task.assignedTo}
                 boardId={task.boardId}
-                orgId={orgId}
+                orgId={orgId ?? ""}
                 createdAt={task.createdAt}
                 getCards={getCards}
               />
