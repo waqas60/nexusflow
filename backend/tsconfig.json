@@ -3,6 +3,11 @@
     "rootDir": ".",
     "outDir": "./dist",
     "module": "nodenext",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@/*": ["./src/*"]
+    },
     "target": "esnext",
     "types": ["node"],
     "sourceMap": true,
