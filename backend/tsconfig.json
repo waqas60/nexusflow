@@ -1,11 +1,5 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "5.0",
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["src/shared/*"],
-      "@/*": ["./src/*"]
-    },
     "rootDir": ".",
     "outDir": "./dist",
     "module": "nodenext",
