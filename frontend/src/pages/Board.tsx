@@ -18,14 +18,11 @@ export const Board = () => {
   const getAllBoards = async () => {
     setLoading(true);
     try {
-      const response = await api.get(
-        `/api/board/${orgId}`,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
+      const response = await api.get(`/api/board/${orgId}`, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
         },
-      );
+      });
       const data = response.data;
       console.log(data.data);
       if (data.success) {
@@ -81,14 +78,11 @@ export const Board = () => {
 
   const deleteBoard = async (id: string) => {
     try {
-      const response = await api.delete(
-        `/api/board/${orgId}/${id}`,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
+      const response = await api.delete(`/api/board/${orgId}/${id}`, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
         },
-      );
+      });
       const data = response.data;
       console.log(data);
 
@@ -114,7 +108,6 @@ export const Board = () => {
         <Button text="Add Board" onClick={() => addBoard()} />
       </div>
 
-      
       {isOpenAddboardBox && (
         <AddBoard
           titleRef={inputRef}
@@ -123,8 +116,13 @@ export const Board = () => {
         />
       )}
 
-      
       <div className="mt-10 flex gap-5 flex-wrap">
+        {boards.length === 0 && (
+          <div className="col-span-3 w-full flex justify-center items-center text-4xl font-bold text-neutral-300 h-40">
+            No Orgs
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center items-center mx-auto">
             <ClipLoader color="#000" size={30} />

@@ -12,7 +12,6 @@ export const Organization = () => {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const [orgs, setOrgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [dataNotFound, setDataNotFound] = useState(false);
 
   const getAllOrgs = async () => {
     setLoading(true);
@@ -26,7 +25,6 @@ export const Organization = () => {
 
       if (data.success) {
         setOrgs(data.data);
-        if (data.data.length === 0) setDataNotFound(true);
       }
     } catch (error: any) {
       if (!error.response.data.success) {
@@ -125,8 +123,11 @@ export const Organization = () => {
       )}
 
       <div className="mt-10 flex gap-5 flex-wrap">
-        {dataNotFound && (
-          <p className="text-neutral-500 text-xl h-full mx-auto">No orgs</p>
+
+        {orgs.length === 0 && (
+          <div className="col-span-3 w-full flex justify-center items-center text-4xl font-bold text-neutral-300 h-40">
+            No Orgs
+          </div>
         )}
 
         {loading ? (
