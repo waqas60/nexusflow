@@ -31,7 +31,7 @@ export const Board = () => {
       if (data.success) {
         setBoards(data.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       if (!error.response.data.success) {
       }
     } finally {
@@ -61,7 +61,7 @@ export const Board = () => {
           await getAllBoards();
           toast.success(data.message);
         }
-      } catch (error) {
+      } catch (error: any) {
         if (error.response.data.message === "incorrect input") {
           toast.error(
             error.response.data.data.map((obj) => obj.message).join(", "),
@@ -96,7 +96,7 @@ export const Board = () => {
         await getAllBoards();
         toast.success(data.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       if (!error.response.data.success) {
         toast.error(error.response.data.message);

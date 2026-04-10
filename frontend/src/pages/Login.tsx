@@ -27,7 +27,7 @@ export default function SignUp() {
         localStorage.setItem("username", data.data.username);
         setTimeout(() => navigate("/dashboard/organization"), 2000);
       }
-    } catch (error) {
+    } catch (error: any) {
       if (!error.response.data.success) {
         const data = error.response.data;
         if (Array.isArray(data.data))

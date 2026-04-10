@@ -28,7 +28,7 @@ export default function SignUp() {
         toast.success(data.message);
         setTimeout(() => navigate("/login"), 2000);
       }
-    } catch (error) {
+    } catch (error : any) {
       if (!error.response.data.success) {
         const data = error.response.data;
         if (Array.isArray(data.data))

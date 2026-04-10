@@ -10,28 +10,25 @@ export const Organization = () => {
   const [isOpenAddOrgBox, setIsOpenAddOrgBox] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  const [orgs, setOrgs] = useState([]);
+  const [orgs, setOrgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataNotFound, setDataNotFound] = useState(false);
 
   const getAllOrgs = async () => {
     setLoading(true);
     try {
-      const response = await api.get(
-        "/api/organization",
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
+      const response = await api.get("/api/organization", {
+        headers: {
+          Authorization: localStorage.getItem("token"),
         },
-      );
+      });
       const data = response.data;
 
       if (data.success) {
         setOrgs(data.data);
         if (data.data.length === 0) setDataNotFound(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       if (!error.response.data.success) {
       }
     } finally {
@@ -61,7 +58,7 @@ export const Organization = () => {
           await getAllOrgs();
           toast.success(data.message);
         }
-      } catch (error) {
+      } catch (error: any) {
         if (error.response.data.message === "incorrect input") {
           console.log(error.response.data.data);
 
@@ -84,21 +81,18 @@ export const Organization = () => {
   const deleteOrg = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const response = await api.delete(
-        `/api/organization/${id}`,
-        {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
+      const response = await api.delete(`/api/organization/${id}`, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
         },
-      );
+      });
       const data = response.data;
 
       if (data.success) {
         await getAllOrgs();
         toast.success(data.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       if (!error.response.data.success) {
         toast.error(error.response.data.message);

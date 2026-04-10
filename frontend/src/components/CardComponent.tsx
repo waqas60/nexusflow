@@ -50,7 +50,7 @@ export default function CardComponent(card: CardComponentProp) {
           card.getCards();
           setisMemberCardOpen(false);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log(error);
         setisMemberCardOpen(false);
         if (!error.response.data.success) {
@@ -72,7 +72,7 @@ export default function CardComponent(card: CardComponentProp) {
         await card.getCards();
         toast.success(data.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       if (!error.response.data.success) {
         await card.getCards();
@@ -92,7 +92,7 @@ export default function CardComponent(card: CardComponentProp) {
         toast.success("Task taken!");
         await card.getCards();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message);
     }
   };
@@ -108,7 +108,7 @@ export default function CardComponent(card: CardComponentProp) {
         toast.success(`Marked as ${status}`);
         await card.getCards();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message);
     }
   };

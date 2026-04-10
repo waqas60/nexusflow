@@ -57,7 +57,7 @@ export const Card = () => {
           setIsOpenAddCardBox(false);
           getCards();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log(error);
         if (!error.response.data.success) {
           toast.error(error.response.data.message);
@@ -82,7 +82,7 @@ export const Card = () => {
       } else {
         setCards([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       if (!error.response.data.success) {
       }

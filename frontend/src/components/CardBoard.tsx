@@ -47,7 +47,7 @@ export default function CardBoard(card: CardBoardProp) {
           setisMemberCardOpen(false);
           toast.success(data.message);
         }
-      } catch (error) {
+      } catch (error: any) {
         if (!error.response.data.success) {
           toast.error(error.response.data.message);
         }
