@@ -13,7 +13,7 @@ export default function Input(input: InputProp) {
       type={input.type}
       placeholder={input.placeholder}
       ref={input.inputRef}
-      className={`${input.className} outline-none text-xs p-2 bg-neutral-50 rounded-md w-80 placeholder:text-xs`}
+      className={`${input.className} outline-none text-xs p-2 bg-neutral-50 rounded-md w-full placeholder:text-xs`}
     />
   );
 }

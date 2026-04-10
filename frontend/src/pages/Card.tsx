@@ -12,7 +12,6 @@ const columnsColors: Record<string, string> = {
   Done: "bg-green-100",
 };
 
-
 export const Card = () => {
   const [isOpenAddCardBox, setIsOpenAddCardBox] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +58,6 @@ export const Card = () => {
           getCards();
         }
       } catch (error: any) {
-        console.log(error);
         if (!error.response.data.success) {
           toast.error(error.response.data.message);
         }
@@ -68,15 +66,10 @@ export const Card = () => {
   };
 
   const getCards = async () => {
-    console.log("orgId:", orgId, "boardId:", boardId); 
-
     try {
-      const response = await api.get(
-        `/api/card/${orgId}/${boardId}`,
-        {
-          headers: { Authorization: localStorage.getItem("token") },
-        },
-      );
+      const response = await api.get(`/api/card/${orgId}/${boardId}`, {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
       const data = response.data;
       if (data.success) {
         setCards(data.data);
@@ -84,7 +77,6 @@ export const Card = () => {
         setCards([]);
       }
     } catch (error: any) {
-      console.log(error);
       if (!error.response.data.success) {
       }
     }
@@ -95,8 +87,8 @@ export const Card = () => {
   }, []);
 
   return (
-    <div className="relative bg-white rounded-lg h-full ">
-      <div className="flex justify-between items-center">
+    <div className="relative bg-white rounded-lg h-full px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-xl mb-2">Cards</h1>
           <p className="text-xs">Manage your cards</p>
@@ -114,25 +106,19 @@ export const Card = () => {
         />
       )}
 
-      <div className="grid w-full grid-cols-3 gap-2 my-8 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-2 my-6 sm:my-8 text-xs">
         {columns.map((col) => (
           <div
-            className={`${columnsColors[col.label]} bg-gray-200 w-full p-3 rounded-md max-h-fit `}
+            key={col.label}
+            className={`${columnsColors[col.label]} w-full p-3 rounded-md`}
           >
-            <h1>{col.label}</h1>
+            <h1 className="mb-2 font-medium">{col.label}</h1>
 
             {col.tasks.map((task) => (
               <CardComponent
                 key={task.id}
-                id={task.id}
-                title={task.title}
-                description={task.description}
-                status={task.status}
-                difficulty={task.difficulty}
-                assignedTo={task.assignedTo}
-                boardId={task.boardId}
+                {...task}
                 orgId={orgId ?? ""}
-                createdAt={task.createdAt}
                 getCards={getCards}
               />
             ))}
@@ -140,7 +126,7 @@ export const Card = () => {
         ))}
 
         {cards.length === 0 && (
-          <div className="col-span-3 w-full flex justify-center items-center text-4xl font-bold text-neutral-300 h-40">
+          <div className="col-span-full w-full flex justify-center items-center text-2xl sm:text-4xl font-bold text-neutral-300 h-40">
             No Card
           </div>
         )}

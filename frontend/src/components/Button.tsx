@@ -10,7 +10,7 @@ type ButtonProp = {
 export default function Button(buttonProp: ButtonProp) {
   return (
     <button
-      className={`${buttonProp.className} p-2 text-xs rounded-md bg-neutral-950 text-white hover:bg-neutral-700 duration-300 cursor-pointer`}
+      className={`${buttonProp.className} p-2 text-xs rounded-md bg-neutral-950 text-white hover:bg-neutral-700 duration-300 cursor-pointer w-full sm:w-auto`}
       onClick={(e) => buttonProp.onClick?.(e)}
     >
       {buttonProp.text ? buttonProp.text : buttonProp.icon}

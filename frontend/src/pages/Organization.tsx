@@ -27,15 +27,15 @@ export const Organization = () => {
         setOrgs(data.data);
       }
     } catch (error: any) {
-      if (!error.response.data.success) {
+      if (!error.response?.data?.success) {
+        console.log(error);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const addOrg = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const addOrg = async () => {
     if (inputRef.current && descriptionRef.current) {
       try {
         const response = await api.post(
@@ -52,18 +52,17 @@ export const Organization = () => {
         );
 
         const data = response.data;
+
         if (data.success) {
-          await getAllOrgs();
+          await getAllOrgs(); 
           toast.success(data.message);
         }
       } catch (error: any) {
-        if (error.response.data.message === "incorrect input") {
-          console.log(error.response.data.data);
-
+        if (error.response?.data?.message === "incorrect input") {
           toast.error(
             error.response.data.data.map((obj: any) => obj.message).join(", "),
           );
-        } else if (!error.response.data.success) {
+        } else if (!error.response?.data?.success) {
           toast.error(error.response.data.message);
         }
       }
@@ -76,40 +75,40 @@ export const Organization = () => {
     getAllOrgs();
   }, []);
 
-  const deleteOrg = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const deleteOrg = async (id: string) => {
     try {
       const response = await api.delete(`/api/organization/${id}`, {
         headers: {
           Authorization: localStorage.getItem("token"),
         },
       });
+
       const data = response.data;
 
       if (data.success) {
-        await getAllOrgs();
+        await getAllOrgs(); 
         toast.success(data.message);
       }
     } catch (error: any) {
       console.log(error);
-      if (!error.response.data.success) {
+      if (!error.response?.data?.success) {
         toast.error(error.response.data.message);
       }
     }
   };
 
   return (
-    <div className="relative ">
-      <div className="flex justify-between items-center">
+    <div className="relative px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-xl mb-2">Organizations</h1>
-          <p className="text-xs">Manage your organizations</p>
+          <h1 className="text-xl mb-1">Organizations</h1>
+          <p className="text-xs text-neutral-500">Manage your organizations</p>
         </div>
+
         <Button
           text="Add Organization"
-          onClick={(e) => {
-            addOrg(e);
-          }}
+          onClick={() => setIsOpenAddOrgBox(true)} 
+          className="w-full sm:w-auto"
         />
       </div>
 
@@ -122,34 +121,24 @@ export const Organization = () => {
         />
       )}
 
-      <div className="mt-10 flex gap-5 flex-wrap">
-
-        {orgs.length === 0 && (
-          <div className="col-span-3 w-full flex justify-center items-center text-4xl font-bold text-neutral-300 h-40">
-            No Orgs
-          </div>
-        )}
-
+      <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {loading ? (
-          <div className="flex justify-center items-center mx-auto">
+          <div className="col-span-full flex justify-center items-center py-10">
             <ClipLoader color="#000" size={30} />
           </div>
-        ) : (
-          <div className="mt-1 flex gap-5 flex-wrap">
-            {orgs.map((card, index) => (
-              <CardOrg
-                key={index}
-                id={card.id}
-                title={card.title}
-                description={card.description}
-                members={card.members}
-                createdAt={card.createdAt}
-                createdBy={card.createdBy}
-                getAllOrgs={getAllOrgs}
-                deleteOrg={deleteOrg}
-              />
-            ))}
+        ) : orgs.length === 0 ? (
+          <div className="col-span-full flex justify-center items-center text-2xl sm:text-4xl font-bold text-neutral-300 h-40">
+            No Orgs
           </div>
+        ) : (
+          orgs.map((card, index) => (
+            <CardOrg
+              key={index}
+              {...card}
+              getAllOrgs={getAllOrgs}
+              deleteOrg={deleteOrg}
+            />
+          ))
         )}
       </div>
     </div>

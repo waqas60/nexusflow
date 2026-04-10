@@ -114,27 +114,31 @@ export default function CardComponent(card: CardComponentProp) {
   };
 
   return (
-    <div className="p-4 rounded-xl border border-gray-200 bg-white flex flex-col gap-1 my-1 relative">
+    <div className="p-4 rounded-xl border border-gray-200 bg-white flex flex-col gap-2 my-1 relative w-full">
       <div>
-        <h1 className="text-md font-medium text-neutral-950">{card.title}</h1>
-        <p className="text-neutral-500 my-3">{card.description}</p>
+        <h1 className="text-md font-medium text-neutral-950 wrap-break-word">
+          {card.title}
+        </h1>
+        <p className="text-neutral-500 my-3 wrap-break-word">
+          {card.description}
+        </p>
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-5">
+      <div className="flex flex-col sm:flex-row justify-between gap-3">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
             <span
               className={`px-2 py-1 rounded-md font-medium ${statusColor[card.status]}`}
             >
               {card.status}
             </span>
+
             <span
               className={`px-2 py-1 rounded-md font-medium ${difficultyColor[card.difficulty]}`}
             >
               {card.difficulty}
             </span>
           </div>
-          
         </div>
 
         <div className="flex gap-1 shrink-0 h-fit absolute top-3 right-2">
@@ -146,16 +150,15 @@ export default function CardComponent(card: CardComponentProp) {
         </div>
       </div>
 
-      
       {card.status === "not_taken" && (
         <>
           {isMemberCardOpen && (
-            <div className="flex gap-1 items-center">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="email"
                 placeholder="enter member email"
                 inputRef={memberRef}
-                className="my-4 w-full"
+                className="my-2 w-full"
               />
               <Button
                 className="bg-red-600 shrink-0"
@@ -164,27 +167,28 @@ export default function CardComponent(card: CardComponentProp) {
               />
             </div>
           )}
-          <div className="flex gap-2">
+
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               text="Assign To"
-              className="w-fit text-xs bg-neutral-900"
+              className="text-xs bg-neutral-900 w-full sm:w-auto"
               onClick={() => assignedTask()}
             />
             <Button
               text="Take Task"
-              className="w-fit text-xs bg-blue-600"
+              className="text-xs bg-blue-600 w-full sm:w-auto"
               onClick={takeTask}
             />
           </div>
         </>
       )}
 
-      
-      {card.status === "pending" && card.assignedTo && (
+      {card.status === "pending"  && (
         <div className="flex flex-col gap-1 my-2">
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 wrap-break-word">
             Assigned to: {card.assignedTo}
           </p>
+
           <button
             onClick={() => updateStatus("done")}
             className="bg-green-500 text-white text-xs px-3 py-1 rounded w-fit"
@@ -194,7 +198,6 @@ export default function CardComponent(card: CardComponentProp) {
         </div>
       )}
 
-      
       {card.status === "done" && (
         <span className="text-emerald-600 text-xs font-medium">
           ✓ Completed

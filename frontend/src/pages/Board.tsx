@@ -99,13 +99,18 @@ export const Board = () => {
   };
 
   return (
-    <div className="relative  ">
-      <div className="flex justify-between items-center">
+    <div className="relative px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-xl mb-2">Boards</h1>
-          <p className="text-xs">Manage your boards</p>
+          <h1 className="text-xl mb-1">Boards</h1>
+          <p className="text-xs text-neutral-500">Manage your boards</p>
         </div>
-        <Button text="Add Board" onClick={() => addBoard()} />
+
+        <Button
+          text="Add Board"
+          className="w-full sm:w-auto"
+          onClick={() => addBoard()}
+        />
       </div>
 
       {isOpenAddboardBox && (
@@ -116,34 +121,24 @@ export const Board = () => {
         />
       )}
 
-      <div className="mt-10 flex gap-5 flex-wrap">
-        {boards.length === 0 && (
-          <div className="col-span-3 w-full flex justify-center items-center text-4xl font-bold text-neutral-300 h-40">
-            No Boards
-          </div>
-        )}
-
+      <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {loading ? (
-          <div className="flex justify-center items-center mx-auto">
+          <div className="col-span-full flex justify-center items-center py-10">
             <ClipLoader color="#000" size={30} />
           </div>
-        ) : (
-          <div className="mt-1 flex gap-5 flex-wrap">
-            {boards.map((card, index) => (
-              <CardBoard
-                key={index}
-                id={card.id}
-                orgId={card.orgId}
-                title={card.title}
-                description={card.description}
-                members={card.members}
-                createdAt={card.createdAt}
-                createdBy={card.createdBy}
-                getAllBoards={getAllBoards}
-                deleteBoard={deleteBoard}
-              />
-            ))}
+        ) : boards.length === 0 ? (
+          <div className="col-span-full flex justify-center items-center text-2xl sm:text-4xl font-bold text-neutral-300 h-40">
+            No Boards
           </div>
+        ) : (
+          boards.map((card, index) => (
+            <CardBoard
+              key={index}
+              {...card}
+              getAllBoards={getAllBoards}
+              deleteBoard={deleteBoard}
+            />
+          ))
         )}
       </div>
     </div>
