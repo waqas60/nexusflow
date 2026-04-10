@@ -1,6 +1,3 @@
-import { ResponseHelper } from "@/helper/index.js";
-import Card from "@/models/Card.js";
-import { CardZod } from "@/shared/schemas/index.js";
 import type { Request, Response } from "express";
 import { formatCard, validateBoard, validateCard } from "./card.helper.js";
 import {
@@ -8,8 +5,10 @@ import {
   validateOrgOwnership,
   validateUser,
 } from "../organization/org.helper.js";
-import Organization from "@/models/Organization.js";
-import Board from "@/models/Board.js";
+import { CardZod } from "../../shared/schemas/index.js";
+import { ResponseHelper } from "../../helper/index.js";
+import Card from "../../models/Card.js";
+import Organization from "../../models/Organization.js";
 
 export async function createCard(req: Request, res: Response) {
   const result = CardZod.CardServerSchema.safeParse({

@@ -1,5 +1,6 @@
-import type { BoardType } from "@/shared/schemas/board.type.js";
+
 import mongoose, { model, Schema } from "mongoose";
+import type { BoardType } from "../shared/schemas/board.type.js";
 
 const boardSchema = new Schema<BoardType>(
   {

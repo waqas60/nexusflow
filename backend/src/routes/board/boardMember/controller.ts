@@ -1,6 +1,3 @@
-import { ResponseHelper } from "@/helper/index.js";
-import Board from "@/models/Board.js";
-import { BoardZod } from "@/shared/schemas/index.js";
 import type { Request, Response } from "express";
 import {
   isSelfAction,
@@ -8,7 +5,9 @@ import {
   validateOrgOwnership,
   validateUser,
 } from "../board.helper.js";
-import z from "zod";
+import { BoardZod } from "../../../shared/schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
+import Board from "../../../models/Board.js";
 
 export async function addMemberInBoard(req: Request, res: Response) {
   const result = BoardZod.BoardMemberSchema.safeParse({
@@ -168,13 +167,13 @@ export async function getBoardsForMember(req: Request, res: Response) {
   try {
     const boards = await Board.find({
       orgId,
-      members: userId, 
+      members: userId,
     }).lean();
 
     if (!boards.length)
       return ResponseHelper.sendNotFoundResponse(res, "No boards found");
 
-    console.log(boards)
+    console.log(boards);
 
     return ResponseHelper.sendSuccessResponse(
       res,

@@ -1,9 +1,9 @@
-import { ResponseHelper } from "@/helper/index.js";
-import Board from "@/models/Board.js";
-import Organization from "@/models/Organization.js";
-import User from "@/models/User.js";
 import type { Response } from "express";
 import type { Types } from "mongoose";
+import Organization from "../../models/Organization.js";
+import { ResponseHelper } from "../../helper/index.js";
+import User from "../../models/User.js";
+import Board from "../../models/Board.js";
 
 export async function validateOrgOwnership(
   res: Response,

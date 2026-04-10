@@ -1,8 +1,8 @@
-import Board from "@/models/Board.js";
-import Card from "@/models/Card.js";
-import { ResponseHelper } from "@/helper/index.js";
 import type { Response } from "express";
 import type { Types } from "mongoose";
+import Board from "../../models/Board.js";
+import { ResponseHelper } from "../../helper/index.js";
+import Card from "../../models/Card.js";
 
 export async function validateBoard(
   res: Response,

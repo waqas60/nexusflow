@@ -1,8 +1,8 @@
 import z from "zod";
-import { OrganizationBaseSchema } from "./organization.type.js";
+import { OrganizationZod } from "./index.js";
 import MongooseObjectId from "./mongoObjectType.js";
 
-export const BoardBaseSchema = OrganizationBaseSchema.extend({
+export const BoardBaseSchema = OrganizationZod.OrganizationBaseSchema.extend({
   orgId: MongooseObjectId,
   userId: MongooseObjectId,
 });

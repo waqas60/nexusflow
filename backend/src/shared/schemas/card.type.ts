@@ -1,9 +1,5 @@
 import z from "zod";
-import {
-  OrganizationBaseSchema,
-  OrganizationServerSchema,
-} from "./organization.type.js";
-import { BoardZod } from "./index.js";
+import { BoardZod, OrganizationZod } from "./index.js";
 import MongooseObjectId from "./mongoObjectType.js";
 
 export enum Difficulty {
@@ -18,7 +14,7 @@ export enum Status {
   DONE = "done",
 }
 
-export const CardBaseSchema = OrganizationBaseSchema.omit({
+export const CardBaseSchema = OrganizationZod.OrganizationBaseSchema.omit({
   members: true,
 }).extend({
   status: z.enum(Status),

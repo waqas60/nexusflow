@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { UserZod } from "@/shared/schemas/index.js";
-import User from "@/models/User.js";
-import { ResponseHelper, Hash, JWT } from "@/helper/index.js";
+import { UserZod } from "../../shared/schemas/index.js";
+import { Hash, JWT, ResponseHelper } from "../../helper/index.js";
+import User from "../../models/User.js";
 
 export async function signUp(req: Request, res: Response) {
   const result = UserZod.userSignUpZodSchema.safeParse(req.body);

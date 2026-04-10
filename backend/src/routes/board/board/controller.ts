@@ -1,6 +1,3 @@
-import { ResponseHelper } from "@/helper/index.js";
-import Board from "@/models/Board.js";
-import { BoardZod } from "@/shared/schemas/index.js";
 import type { Request, Response } from "express";
 import {
   formatBoard,
@@ -8,7 +5,10 @@ import {
   validateBoard,
   validateOrgOwnership,
 } from "../board.helper.js";
-import Organization from "@/models/Organization.js";
+import { BoardZod } from "../../../shared/schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
+import Board from "../../../models/Board.js";
+import Organization from "../../../models/Organization.js";
 
 export async function createBoard(req: Request, res: Response) {
   const result = BoardZod.BoardBaseSchema.safeParse({

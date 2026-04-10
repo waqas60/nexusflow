@@ -1,9 +1,9 @@
+import mongoose, { model, Schema } from "mongoose";
 import {
   Difficulty,
   Status,
   type CardServerSchemaType,
-} from "@/shared/schemas/card.type.js";
-import mongoose, { model, Schema } from "mongoose";
+} from "../shared/schemas/card.type.js";
 
 const cardSchema = new Schema<CardServerSchemaType>(
   {
@@ -31,9 +31,6 @@ const cardSchema = new Schema<CardServerSchemaType>(
   { timestamps: true },
 );
 
-
-
 const Card = model("cards", cardSchema);
-
 
 export default Card;

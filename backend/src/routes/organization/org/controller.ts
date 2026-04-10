@@ -1,9 +1,10 @@
-import { ResponseHelper } from "@/helper/index.js";
-import Organization from "@/models/Organization.js";
-import { OrganizationZod } from "@/shared/schemas/index.js";
+
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import { formatOrg } from "../org.helper.js";
+import { OrganizationZod } from "../../../shared/schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
+import Organization from "../../../models/Organization.js";
 
 export async function createOrganization(req: Request, res: Response) {
   const result = OrganizationZod.OrganizationServerSchema.safeParse({

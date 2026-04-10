@@ -1,12 +1,11 @@
-import { ResponseHelper } from "@/helper/index.js";
-import Organization from "@/models/Organization.js";
-import { OrganizationZod } from "@/shared/schemas/index.js";
 import type { Request, Response } from "express";
 import {
   isSelfAction,
   validateOrgOwnership,
   validateUser,
 } from "../org.helper.js";
+import { OrganizationZod } from "../../../shared/schemas/index.js";
+import { ResponseHelper } from "../../../helper/index.js";
 
 export async function addMember(req: Request, res: Response) {
   const result = OrganizationZod.AddOrgServerSchema.safeParse({
@@ -28,7 +27,7 @@ export async function addMember(req: Request, res: Response) {
 
     if (isSelfAction(res, user._id, org.userId)) return;
 
-    if (org.members.some((m) => m.equals(user._id)))
+    if (org.members.some((m: any) => m.equals(user._id)))
       return ResponseHelper.sendAlreadyExistResponse(res, "User", email);
 
     org.members.push(user._id);
@@ -68,13 +67,13 @@ export async function deleteMember(req: Request, res: Response) {
 
     if (isSelfAction(res, user._id, org.userId)) return;
 
-    if (!org.members.some((m) => m.equals(user._id)))
+    if (!org.members.some((m: any) => m.equals(user._id)))
       return ResponseHelper.sendNotFoundResponse(
         res,
         "User is not a member of this organization",
       );
 
-    org.members = org.members.filter((m) => !m.equals(user._id));
+    org.members = org.members.filter((m: any) => !m.equals(user._id));
     await org.save();
 
     return ResponseHelper.sendSuccessResponse(

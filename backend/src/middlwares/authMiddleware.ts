@@ -22,3 +22,6 @@ export function authMiddleware(
     return ResponseHelper.sendInvalidCreditionalsReponse(res, "invalid token");
   }
 }
+
+export default authMiddleware
+

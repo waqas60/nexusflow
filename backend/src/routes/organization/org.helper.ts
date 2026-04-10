@@ -1,8 +1,8 @@
-import Organization from "@/models/Organization.js";
-import User from "@/models/User.js";
-import { ResponseHelper } from "@/helper/index.js";
 import type { Response } from "express";
 import type { Types } from "mongoose";
+import Organization from "../../models/Organization.js";
+import { ResponseHelper } from "../../helper/index.js";
+import User from "../../models/User.js";
 
 export async function validateOrgOwnership(
   res: Response,
@@ -22,7 +22,7 @@ export async function validateOrgOwnership(
 
 export async function validateUser(res: Response, email: string) {
   const user = await User.findOne({ email });
-  
+
   if (!user) {
     ResponseHelper.sendNotFoundResponse(res, "User not found");
     return null;
