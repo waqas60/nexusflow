@@ -77,6 +77,8 @@ export async function getAllBoards(req: Request, res: Response) {
       .populate("orgId", "_id title")
       .lean();
 
+      
+
     const formattedData = allBoards.map((board) => ({
       id: board._id,
       orgId: (board.orgId as any)._id,
@@ -84,7 +86,7 @@ export async function getAllBoards(req: Request, res: Response) {
       title: board.title,
       description: board.description,
       members: board.members,
-      createdBy: (board.userId as any)?.username ?? "Unknown",
+      createdBy: (board.userId as any)?.username,
       createdAt: (board as any).createdAt.toLocaleDateString("en-US"),
     }));
 
