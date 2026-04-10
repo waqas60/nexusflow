@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Button from "./Button";
 import { MdDelete } from "react-icons/md";
 import Input from "./Input";

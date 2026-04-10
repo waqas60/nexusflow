@@ -11,12 +11,10 @@ export default function SignUp() {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) return;
-    setLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/signin",
