@@ -19,6 +19,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
             nexusflow
+            <span className="text-violet-500">.</span>
           </span>
         </div>
 
