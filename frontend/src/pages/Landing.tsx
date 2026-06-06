@@ -47,7 +47,7 @@ export default function Landing() {
               type="video/mp4"
             />
           </video> */}
-          <img src="./assets/landing_image.png" className="" alt="NexusFlow" />
+          <img src="landing_image.png" className="" alt="NexusFlow" />
         </div>
       </section>
     </div>
